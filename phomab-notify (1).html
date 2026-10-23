@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phomab: find a house in Bulawayo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Public+Sans:wght@400;600&display=swap">
+<style>
+:root{--bg:#F6F8F7;--text:#10283D;--muted:#4F6070;--card:#FFFFFF;--line:#D3DCD8;--sun:#F4B400;--leaf:#1E7B4F;--brick:#C8372D;--onsun:#10283D;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1A22;--text:#EAF1EE;--muted:#9FB2BA;--card:#152730;--line:#2A424E;--leaf:#4DBB85;--brick:#F0766C;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1A22;--text:#EAF1EE;--muted:#9FB2BA;--card:#152730;--line:#2A424E;--leaf:#4DBB85;--brick:#F0766C;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.55 "Public Sans",system-ui,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px 60px}
+header{display:flex;align-items:center;gap:10px;padding:16px 0;flex-wrap:wrap}
+.brand{font:800 26px/1 "Bricolage Grotesque",system-ui,sans-serif;letter-spacing:-.5px;margin-right:auto}
+.brand i{display:inline-block;width:.55em;height:.55em;background:var(--sun);margin-right:.25em;clip-path:polygon(50% 0,100% 45%,100% 100%,0 100%,0 45%)}
+select,input,textarea,button{font:inherit;color:inherit}
+select{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+nav{display:flex;gap:6px;width:100%}
+nav button{flex:1;padding:10px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:600;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+h1{font:800 clamp(40px,11vw,64px)/.98 "Bricolage Grotesque",system-ui,sans-serif;letter-spacing:-1.5px;margin:20px 0 10px}
+h2{font:800 20px/1.2 "Bricolage Grotesque",system-ui,sans-serif;margin:0 0 4px}
+.lead{color:var(--muted);max-width:52ch;margin:0 0 22px}
+.step{border-left:4px solid var(--line);padding:2px 0 22px 16px;margin-left:6px}
+.step.on{border-color:var(--sun)}
+.step.done{border-color:var(--leaf)}
+.step>p{margin:0 0 10px;color:var(--muted)}
+textarea,input[type=text],input[type=number],select.f{width:100%;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px 14px}
+textarea{min-height:84px;resize:vertical}
+textarea:focus,input:focus,select:focus,button:focus-visible{outline:3px solid var(--sun);outline-offset:1px}
+.btn{background:var(--sun);color:var(--onsun);font-weight:700;border:0;border-radius:12px;padding:12px 18px;cursor:pointer}
+.btn.alt{background:transparent;border:2px solid var(--line);color:var(--text)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer}
+.tag{background:var(--card);border:1px solid var(--line);border-radius:4px 14px 4px 14px;padding:14px;margin:0 0 10px;position:relative}
+.tag::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--sun);border-radius:4px 0 0 4px}
+.tag h3{margin:0 0 2px;font-size:17px}
+.tag .row{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.price{font:800 22px "Bricolage Grotesque",system-ui,sans-serif;color:var(--leaf)}
+.meta{color:var(--muted);font-size:14px}
+.why{font-size:13px;color:var(--leaf);font-weight:600}
+.empty{border:2px dashed var(--line);border-radius:12px;padding:14px;color:var(--muted)}
+.chat{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.chat-h{padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600}
+.msgs{max-height:300px;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:82%;padding:8px 12px;border-radius:14px;font-size:15px}
+.m.l{background:var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.m.t{background:var(--leaf);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.m.s{align-self:center;background:transparent;color:var(--muted);font-size:13px}
+.bar{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.bar input{flex:1;min-width:0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+.deal{background:var(--leaf);color:#fff;padding:12px 14px;font-weight:600}
+.form{display:grid;gap:10px}
+.form label{font-weight:600;font-size:14px;display:grid;gap:4px}
+.note{font-size:13px;color:var(--muted);margin-top:18px}
+[hidden]{display:none!important}
+
+.auth{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 18px;display:grid;gap:8px}
+.auth input{width:100%;border:2px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg)}
+.who{font-size:13px;color:var(--muted)}
+.m .o{font-weight:700}
+.m button{margin-top:6px;background:var(--sun);color:var(--onsun);border:0;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer}
+nav button{font-size:15px}
+.ph{width:100%;height:170px;object-fit:cover;border-radius:10px;margin:0 0 8px;cursor:zoom-in;background:var(--line)}
+#big{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:9;padding:12px}
+#big img{max-width:100%;max-height:100%;border-radius:10px}
+#prev{max-width:100%;max-height:200px;border-radius:12px;object-fit:cover}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand"><i></i>Phomab</div>
+  <select id="lang" aria-label="Language"><option value="en">English</option><option value="nd">Ndebele</option><option value="sn">Shona</option></select>
+  <button class="btn alt" id="authBtn" type="button"></button>
+  <nav role="tablist"><button role="tab" id="t-find" aria-selected="true" data-i="tabFind"></button><button role="tab" id="t-list" aria-selected="false" data-i="tabList"></button><button role="tab" id="t-chats" aria-selected="false" data-i="tabChats"></button></nav>
+</header>
+
+<section class="auth" id="auth" hidden>
+  <h2 data-i="signIn"></h2>
+  <input id="em" type="text" inputmode="email" autocomplete="email" placeholder="Email">
+  <input id="pw" type="password" autocomplete="current-password" placeholder="Password (6+ characters)">
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="doIn" type="button" data-i="signIn"></button><button class="btn alt" id="doUp" type="button" data-i="signUp"></button></div>
+  <p class="why" id="amsg" role="status"></p>
+</section>
+
+<main id="v-find">
+  <h1>Ask. Match. Agree.</h1>
+  <p class="lead" data-i="lead"></p>
+  <button class="btn alt" id="shareApp" type="button" data-i="shareApp" style="margin-bottom:20px"></button>
+  <section class="step on" id="s1">
+    <h2 data-i="ask"></h2>
+    <p data-i="askHint"></p>
+    <textarea id="q" rows="3" aria-label="Request"></textarea>
+    <div class="chips" id="chips"></div>
+    <button class="btn" id="go" data-i="find"></button>
+  </section>
+  <section class="step" id="s2" hidden>
+    <h2 data-i="match"></h2>
+    <p id="mhint"></p>
+    <div id="results" aria-live="polite"></div>
+  </section>
+</main>
+
+<main id="v-list" hidden>
+  <h1 style="font-size:clamp(34px,9vw,52px)" data-i="listTitle"></h1>
+  <p class="lead" data-i="listLead"></p>
+  <div class="form">
+    <label><span data-i="fTitle"></span><input type="text" id="f-title" placeholder="3 rooms, tiled, own yard"></label>
+    <label><span data-i="fArea"></span><input type="text" id="f-area" placeholder="Nketha"></label>
+    <label><span data-i="fRooms"></span><input type="number" id="f-rooms" min="1" max="12" value="3"></label>
+    <label><span data-i="fRent"></span><input type="number" id="f-rent" min="1" placeholder="180"></label>
+    <label><span data-i="fPhoto"></span><input type="file" id="f-photo" accept="image/*"></label>
+    <img id="prev" alt="" hidden>
+    <button class="btn" id="save" data-i="save"></button>
+    <p id="saved" class="why" role="status"></p>
+  </div>
+  <h2 style="margin-top:26px" data-i="mine"></h2>
+  <div id="mine"></div>
+</main>
+
+<main id="v-chats" hidden>
+  <h1 style="font-size:clamp(34px,9vw,52px)" data-i="tabChats"></h1>
+  <button class="btn alt" id="notifBtn" type="button" style="margin-bottom:14px"></button>
+  <div id="chatList"></div>
+  <div class="chat" id="chatBox" hidden>
+    <div class="chat-h" id="chat-h"></div>
+    <div class="deal" id="deal" hidden></div>
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+    <div class="bar"><input id="msg" type="text" aria-label="Message" data-ph="msgPh"><button class="btn" id="send" type="button" data-i="send"></button></div>
+    <div class="bar"><input id="offer" type="number" min="1" inputmode="numeric" aria-label="Offer" data-ph="offerPh"><button class="btn alt" id="mkoffer" type="button" data-i="offer"></button></div>
+  </div>
+</main>
+<div id="big" hidden><img alt=""></div>
+<p class="note" data-i="note"></p>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,addDoc,getDocs,getDoc,setDoc,query,where,orderBy,onSnapshot,doc,updateDoc,deleteDoc,serverTimestamp,limit} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* Firebase config for project PMATA */
+const firebaseConfig={apiKey:"AIzaSyB5NIgSzcINTZEeoM7RE3NgcqeDydvAsyE",authDomain:"pmata-26d51.firebaseapp.com",projectId:"pmata-26d51"};
+
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const T={
+en:{tabFind:"Find a house",tabList:"I\u2019m a landlord",tabChats:"Chats",signIn:"Sign in",signUp:"Create account",signOut:"Sign out",lead:"Tell Phomab what you need. It finds matching houses, then you chat with the landlord and agree on the rent.",ask:"What house do you need?",askHint:"Say it like you would to a friend: rooms, area, budget.",find:"Find matches",match:"Matches",send:"Send",offer:"Make offer",msgPh:"Write a message",offerPh:"Offer in $",listTitle:"List a vacancy",listLead:"Add a house you want to rent out. Tenants who ask for a match will see it.",fTitle:"Short description",fArea:"Area",fRooms:"Rooms",fRent:"Rent per month ($)",fPhoto:"Photo of the house (optional)",save:"Save vacancy",mine:"Your vacancies",note:"Prototype. Chats are private between tenant and landlord. Always view a house in person before paying anything.",ph:"e.g. I need a 3 roomed house in Nketha under $200",none:"No match yet. Your request is saved so we can see what people need. Try a nearby area or a higher budget.",found:"Matches found:",shareWA:"Share on WhatsApp",shareApp:"Invite landlords and tenants on WhatsApp",notif:"Turn on message alerts",notifOn:"Message alerts are on",view:"Chat to agree",login:"Please sign in first."},
+nd:{tabFind:"Funa indlu",tabList:"Ngingumnini wendlu",tabChats:"Izingxoxo",signIn:"Ngena",signUp:"Vula i-akhawunti",signOut:"Phuma",ask:"Ufuna indlu enjani?",find:"Funa",match:"Okutholakeleyo",send:"Thumela",offer:"Nikela intengo",lead:"Tshela Phomab ofunayo. Izakuthola izindlu, uzakhulumisana lomnini wendlu.",listTitle:"Beka indlu etholakalayo",save:"Gcina",mine:"Izindlu zakho"},
+sn:{tabFind:"Tsvaga imba",tabList:"Ndiri muridzi wemba",tabChats:"Hurukuro",signIn:"Pinda",signUp:"Vhura account",signOut:"Buda",ask:"Unoda imba yakadini?",find:"Tsvaga",match:"Zvawanikwa",send:"Tumira",offer:"Taridza mutengo",lead:"Udza Phomab zvaunoda. Inokuwanira dzimba, wobva wataura nemuridzi wemba.",listTitle:"Isa imba iripo",save:"Chengeta",mine:"Dzimba dzako"}};
+let lang="en",user=null,listings=[],curChat=null,unsubMsgs=null,unsubChats=null,unreadN=0,firstSnap=true,lastDocs=[],swReg=null,lastSeen={};
+try{lastSeen=JSON.parse(localStorage.getItem("phb_seen")||"{}")}catch(e){}
+const t=k=>(T[lang]&&T[lang][k])||T.en[k]||"";
+const $=id=>document.getElementById(id);
+const mk=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e};
+function apply(){document.documentElement.lang=lang;document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=t(e.dataset.ph));$("q").placeholder=t("ph");$("authBtn").textContent=user?t("signOut"):t("signIn");setBadge(unreadN);notifLabel()}
+const base=()=>location.origin+location.pathname;
+function wa(text){window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank")}
+let photoData=null;
+function shrink(file,max=560,q=.6){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const r=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",q))};img.onerror=()=>rej(new Error("Could not read that photo"));img.src=u})}
+function photoEl(l){if(!l.photo)return null;const i=mk("img","ph");i.src=l.photo;i.alt=l.title;i.loading="lazy";i.onclick=()=>{$("big").querySelector("img").src=l.photo;$("big").hidden=false};return i}
+function shareBtn(l){const b=mk("button","btn alt",t("shareWA"));b.type="button";b.style.marginTop="8px";b.onclick=()=>wa("House to rent: "+l.title+", "+l.area+", "+l.rooms+" rooms, $"+l.rent+"/month. Chat with the landlord on Phomab: "+base());return b}
+function chips(){const c=$("chips");c.textContent="";["3 roomed house in Nketha","2 rooms in Luveve under $130","4 rooms Magwegwe"].forEach(s=>{const b=mk("button","chip",s);b.type="button";b.onclick=()=>{$("q").value=s;run()};c.appendChild(b)})}
+function parse(s){s=s.toLowerCase();let rooms=null,budget=null,m=s.match(/(\d+)\s*-?\s*(room|bedroom)/);if(m)rooms=+m[1];
+m=s.match(/(?:under|below|max|budget|up to|\$)\s*\$?\s*(\d+)/)||s.match(/(\d+)\s*(usd|dollars)/);if(m)budget=+m[1];
+const areas=[...new Set(listings.map(x=>x.area))].filter(a=>s.includes(a.toLowerCase()));return{rooms,budget,areas}}
+function score(l,p){let sc=0,why=[];
+if(p.areas.length){if(p.areas.includes(l.area)){sc+=3;why.push(l.area)}else return null}
+if(p.rooms){if(l.rooms===p.rooms){sc+=3;why.push(l.rooms+" rooms")}else return null}
+if(p.budget){if(l.rent<=p.budget){sc+=2;why.push("within $"+p.budget)}else return null}
+return{sc,why}}
+async function loadListings(){const s=await getDocs(query(collection(db,"listings"),orderBy("createdAt","desc"),limit(60)));listings=s.docs.map(d=>({id:d.id,...d.data()})).filter(l=>l.title&&l.area&&l.rooms&&l.rent&&l.owner)}
+async function run(){const q=$("q").value.trim();if(!q)return;
+try{await loadListings()}catch(e){$("s2").hidden=false;$("mhint").textContent="Could not load listings: "+e.message;return}
+const p=parse(q),res=listings.map(l=>({l,r:score(l,p)})).filter(x=>x.r).sort((a,b)=>b.r.sc-a.r.sc).slice(0,8);
+if(user){addDoc(collection(db,"requests"),{uid:user.uid,q,rooms:p.rooms||null,budget:p.budget||null,areas:p.areas,matches:res.length,at:serverTimestamp()}).catch(()=>{})}
+$("s2").hidden=false;$("s2").className="step done";$("s1").className="step done";
+$("mhint").textContent=res.length?t("found")+" "+res.length:"";
+const box=$("results");box.textContent="";
+if(!res.length){box.appendChild(mk("div","empty",t("none")));return}
+res.forEach(({l,r})=>{const c=mk("article","tag");const row=mk("div","row");const b=mk("button","btn",t("view"));b.type="button";b.onclick=()=>startChat(l);
+row.append(mk("span","price","$"+l.rent+"/mo"),b);
+const ph=photoEl(l);if(ph)c.append(ph);c.append(mk("h3","",l.title),mk("div","meta",l.area+" \u00b7 "+l.rooms+" rooms"),mk("div","why",r.why.join(", ")),row,shareBtn(l));box.appendChild(c)});
+$("s2").scrollIntoView({behavior:"smooth"})}
+async function startChat(l){if(!user){showAuth(t("login"));return}
+if(l.owner===user.uid){alert("This is your own listing.");return}
+const id=l.id+"_"+user.uid,ref=doc(db,"chats",id);
+try{const s=await getDoc(ref);if(!s.exists())await setDoc(ref,{members:[user.uid,l.owner],listingId:l.id,title:l.title,area:l.area,rent:l.rent,agreed:null,updatedAt:serverTimestamp()});
+tab("chats");openChat(id,l.title+", "+l.area)}catch(e){alert("Chat error: "+e.message)}}
+const ms=c=>c&&c.updatedAt&&c.updatedAt.toMillis?c.updatedAt.toMillis():Date.now();
+function markSeen(id,c){lastSeen[id]=ms(c);try{localStorage.setItem("phb_seen",JSON.stringify(lastSeen))}catch(e){}}
+function isUnread(d){const c=d.data();if(!user||!c.lastFrom||c.lastFrom===user.uid)return false;if(curChat===d.id&&!document.hidden&&!$("v-chats").hidden)return false;return ms(c)>(lastSeen[d.id]||0)}
+function setBadge(n){unreadN=n;$("t-chats").textContent=t("tabChats")+(n?" ("+n+")":"");document.title=(n?"("+n+") ":"")+"Phomab: find a house in Bulawayo"}
+function renderChats(){const box=$("chatList");box.textContent="";let n=0;
+if(!lastDocs.length){box.appendChild(mk("div","empty","No chats yet. Find a house and tap Chat to agree."));setBadge(0);return}
+lastDocs.forEach(d=>{const c=d.data(),u=isUnread(d);if(u)n++;
+const b=mk("button","tag",(u?"\u25cf ":"")+c.title+" \u00b7 "+c.area+" \u00b7 $"+c.rent+(c.agreed?" \u00b7 Agreed $"+c.agreed:"")+(u&&c.lastText?"\n"+c.lastText:""));
+b.type="button";b.style.cssText="display:block;width:100%;text-align:left;cursor:pointer;white-space:pre-line;font-weight:"+(u?"800":"400");b.onclick=()=>openChat(d.id,c.title+", "+c.area);box.appendChild(b)});
+setBadge(n)}
+function notify(c){try{navigator.vibrate&&navigator.vibrate(200)}catch(e){}
+if(!("Notification" in window)||Notification.permission!=="granted")return;
+const title="New message on Phomab",opts={body:(c.lastText||"New message")+" \u00b7 "+c.title,tag:"phomab"};
+if(swReg){navigator.serviceWorker.ready.then(r=>r.showNotification(title,opts)).catch(()=>{})}else{try{new Notification(title,opts)}catch(e){}}}
+function notifLabel(){const b=$("notifBtn");if(!b)return;if(!("Notification" in window)){b.hidden=true;return}
+const on=Notification.permission==="granted";b.textContent=on?t("notifOn"):t("notif");b.disabled=on||Notification.permission==="denied"}
+function watchChats(){if(unsubChats)unsubChats();if(!user)return;firstSnap=true;
+unsubChats=onSnapshot(query(collection(db,"chats"),where("members","array-contains",user.uid)),s=>{lastDocs=s.docs;renderChats();
+if(!firstSnap)s.docChanges().forEach(ch=>{if(ch.type!=="modified")return;const c=ch.doc.data();
+if(c.lastFrom&&c.lastFrom!==user.uid&&(document.hidden||curChat!==ch.doc.id||$("v-chats").hidden))notify(c)});
+firstSnap=false})}
+function openChat(id,title){curChat=id;$("chatBox").hidden=false;$("chat-h").textContent=title;$("deal").hidden=true;
+if(unsubMsgs)unsubMsgs();
+onSnapshot(doc(db,"chats",id),d=>{if(d.exists()&&!document.hidden){markSeen(id,d.data());renderChats()}const a=d.data()&&d.data().agreed;$("deal").hidden=!a;if(a)$("deal").textContent="Deal agreed at $"+a+"/month. Next: view the house in person and sign the agreement."});
+unsubMsgs=onSnapshot(query(collection(db,"chats",id,"messages"),orderBy("at")),s=>{const box=$("msgs");box.textContent="";
+s.docs.forEach(d=>{const m=d.data(),mine=m.from===user.uid,el=mk("div","m "+(mine?"t":"l"));
+if(m.offer){el.appendChild(mk("div","o","Offer: $"+m.offer+"/month"));if(!mine){const b=mk("button","","Accept $"+m.offer);b.type="button";b.onclick=()=>updateDoc(doc(db,"chats",id),{agreed:m.offer,updatedAt:serverTimestamp(),lastFrom:user.uid,lastText:"Offer accepted: $"+m.offer});el.appendChild(b)}}
+if(m.text)el.appendChild(mk("div","",m.text));box.appendChild(el)});box.scrollTop=1e6});
+$("chatBox").scrollIntoView({behavior:"smooth"})}
+async function post(data){if(!curChat||!user)return;await addDoc(collection(db,"chats",curChat,"messages"),{from:user.uid,at:serverTimestamp(),...data});updateDoc(doc(db,"chats",curChat),{updatedAt:serverTimestamp(),lastFrom:user.uid,lastText:data.text?data.text.slice(0,80):"Offer: $"+data.offer}).catch(()=>{})}
+async function sendMsg(){const v=$("msg").value.trim();if(!v)return;$("msg").value="";post({text:v})}
+async function sendOffer(){const v=+$("offer").value;if(!v)return;$("offer").value="";post({offer:v})}
+async function mine(){const box=$("mine");box.textContent="";if(!user){box.appendChild(mk("div","empty",t("login")));return}
+const s=await getDocs(query(collection(db,"listings"),where("owner","==",user.uid)));
+if(s.empty){box.appendChild(mk("div","empty","No vacancies yet."));return}
+s.docs.forEach(d=>{const l=d.data(),c=mk("article","tag"),del=mk("button","btn alt","Remove");del.type="button";del.onclick=async()=>{await deleteDoc(doc(db,"listings",d.id));mine()};
+const ph=photoEl(l);if(ph)c.append(ph);c.append(mk("h3","",l.title),mk("div","meta",l.area+" \u00b7 "+l.rooms+" rooms \u00b7 $"+l.rent+"/mo"),del,shareBtn(l));box.appendChild(c)})}
+async function save(){if(!user){showAuth(t("login"));return}
+const title=$("f-title").value.trim(),area=$("f-area").value.trim(),rooms=+$("f-rooms").value,rent=+$("f-rent").value;
+if(!title||!area||!rooms||!rent){$("saved").textContent="Fill in all four fields.";return}
+try{await addDoc(collection(db,"listings"),{title,area,rooms,rent,photo:photoData||null,owner:user.uid,createdAt:serverTimestamp()});photoData=null;$("f-photo").value="";$("prev").hidden=true;
+["f-title","f-area","f-rent"].forEach(i=>$(i).value="");$("saved").textContent="Saved. Tenants asking for "+area+" can now see it.";mine()}catch(e){$("saved").textContent="Error: "+e.message}}
+function tab(w){["find","list","chats"].forEach(n=>{$("v-"+n).hidden=n!==w;$("t-"+n).setAttribute("aria-selected",n===w)});if(w==="list")mine();if(w==="chats")watchChats()}
+function showAuth(msg){$("auth").hidden=false;$("amsg").textContent=msg||"";$("em").focus()}
+async function authGo(up){const e=$("em").value.trim(),p=$("pw").value;$("amsg").textContent="...";
+try{up?await createUserWithEmailAndPassword(auth,e,p):await signInWithEmailAndPassword(auth,e,p);$("auth").hidden=true;$("pw").value=""}catch(x){$("amsg").textContent=x.code==="auth/invalid-credential"?"Wrong email or password.":x.code==="auth/email-already-in-use"?"Email already in use. Try Sign in.":x.code==="auth/weak-password"?"Password needs 6+ characters.":x.message}}
+onAuthStateChanged(auth,u=>{user=u;apply();if(!u){unreadN=0;lastDocs=[];setBadge(0);if(unsubChats)unsubChats();if(unsubMsgs)unsubMsgs();$("chatBox").hidden=true;$("chatList").textContent=""}else watchChats()});
+$("lang").onchange=e=>{lang=e.target.value;apply()};
+$("authBtn").onclick=()=>user?signOut(auth):showAuth("");
+$("doIn").onclick=()=>authGo(false);$("doUp").onclick=()=>authGo(true);
+$("t-find").onclick=()=>tab("find");$("t-list").onclick=()=>tab("list");$("t-chats").onclick=()=>tab("chats");
+$("shareApp").onclick=()=>wa("Looking for a house, or have one to rent? Tell Phomab what you need and get matched with landlords in Bulawayo: "+base());$("big").onclick=()=>{$("big").hidden=true};$("f-photo").onchange=async e=>{const f=e.target.files[0];photoData=null;$("prev").hidden=true;if(!f)return;try{photoData=await shrink(f);$("prev").src=photoData;$("prev").hidden=false}catch(x){$("saved").textContent=x.message}};$("go").onclick=run;$("save").onclick=save;$("send").onclick=sendMsg;$("mkoffer").onclick=sendOffer;
+$("msg").addEventListener("keydown",e=>{if(e.key==="Enter")sendMsg()});
+$("offer").addEventListener("keydown",e=>{if(e.key==="Enter")sendOffer()});
+$("notifBtn").onclick=()=>{Notification.requestPermission().then(()=>notifLabel())};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){const d=lastDocs.find(x=>x.id===curChat);if(d)markSeen(d.id,d.data());renderChats()}});
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").then(r=>{swReg=r}).catch(()=>{});
+apply();chips();
+</script>
+</body>
+</html>
