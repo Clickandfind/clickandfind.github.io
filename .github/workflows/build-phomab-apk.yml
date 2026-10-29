@@ -1,0 +1,44 @@
+name: Build PHOMAB APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PHOMAB
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build installable debug APK
+        working-directory: android
+        run: gradle --no-daemon assembleDebug
+
+      - name: Publish APK as a GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: phomab-v1.0.0
+          name: PHOMAB Android 1.0.0
+          body: |
+            PHOMAB Android app package.
+            This is a debug-signed installable APK. Live listings, sign-in, messaging and contact features require an internet connection.
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          fail_on_unmatched_files: true
+          overwrite_files: true
