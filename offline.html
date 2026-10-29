@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0B477F">
+<title>PHOMAB — Offline</title>
+<style>
+:root{color-scheme:light;--bg:#FFF8F1;--ink:#34251F;--muted:#78665C;--orange:#E85B22;--line:#F0DCCB}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,sans-serif}
+main{width:min(100%,480px);background:#fff;border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:0 12px 36px #73391f12}
+.brand{width:76px;height:76px;display:grid;place-items:center;border-radius:22px;background:var(--orange);color:white;font-size:28px;font-weight:900;letter-spacing:-2px}
+h1{font-size:30px;line-height:1.1;margin:20px 0 8px}p{color:var(--muted)}.status{display:inline-block;border-radius:999px;background:#fff0e6;color:#9f351f;padding:5px 10px;font-size:13px;font-weight:800}
+button{border:0;border-radius:12px;background:var(--orange);color:white;font:700 16px system-ui;padding:13px 18px;cursor:pointer;width:100%;margin-top:12px}
+.small{font-size:13px}
+</style>
+</head>
+<body><main>
+<div class="brand" aria-label="PHOMAB">P</div>
+<p class="status">YOU'RE OFFLINE</p>
+<h1>PHOMAB is saved on this device.</h1>
+<p>The app shell is available, but live listings, sign-in, messages, and landlord contact details need an internet connection.</p>
+<p>Reconnect to the internet and reload to fetch the latest homes and updates.</p>
+<button onclick="location.reload()">Try again</button>
+<p class="small">Ask. Match. Agree.</p>
+</main></body></html>
