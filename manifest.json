@@ -1,0 +1,12 @@
+{
+  "name": "PHOMAB — Ask. Match. Agree.",
+  "short_name": "PHOMAB",
+  "description": "Find houses and rooms to rent in Bulawayo.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF8F1",
+  "theme_color": "#0B477F",
+  "icons": []
+}
