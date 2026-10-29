@@ -33,16 +33,12 @@ jobs:
 
       - name: Build installable debug APK
         working-directory: android
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon --stacktrace assembleDebug
 
-      - name: Publish APK as a GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload APK build artifact
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: phomab-v1.0.0
-          name: PHOMAB Android 1.0.0
-          body: |
-            PHOMAB Android app package.
-            This is a debug-signed installable APK. Live listings, sign-in, messaging and contact features require an internet connection.
-          files: android/app/build/outputs/apk/debug/app-debug.apk
-          fail_on_unmatched_files: true
-          overwrite_files: true
+          name: PHOMAB-Android-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
