@@ -1,6 +1,10 @@
 name: Build PHOMAB APK
 
 on:
+  push:
+    paths:
+      - 'android/**'
+      - '.github/workflows/build-phomab-apk.yml'
   workflow_dispatch:
 
 permissions:
