@@ -690,6 +690,19 @@ $("helpFab").onclick=openHelp;$("helpBack").onclick=closeHelp;
 $("hsend").onclick=()=>{const v=$("hin").value;$("hin").value="";ask(v)};$("hin").addEventListener("keydown",e=>{if(e.key==="Enter"){const v=$("hin").value;$("hin").value="";ask(v)}});
 ["How do I find a house?","How do I list a house?","How do I add photos?","How does chat work?","Is it safe?","How do alerts work?"].forEach(x=>{const b=mk("button","btn alt sm",x);b.type="button";b.onclick=()=>ask(x);$("hchips").appendChild(b)});
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){const d=lastDocs.find(x=>x.id===curChat);if(d)markSeen(d.id,d.data());renderChats()}});
+
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",event=>{
+ event.preventDefault(); deferredInstallPrompt=event;
+ if(document.getElementById("phomabInstall")) return;
+ const b=document.createElement("button"); b.id="phomabInstall"; b.type="button"; b.textContent="Install PHOMAB";
+ b.setAttribute("aria-label","Install PHOMAB on this device");
+ b.style.cssText="position:fixed;right:16px;top:72px;z-index:1000;border:0;border-radius:999px;padding:12px 18px;background:#0B477F;color:#fff;font-weight:800;box-shadow:0 4px 16px #0003";
+ b.addEventListener("click",async()=>{if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;b.remove()});
+ document.body.appendChild(b);
+});
+window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;document.getElementById("phomabInstall")?.remove()});
+
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").then(r=>{swReg=r}).catch(()=>{});
 $("areas").append(...SUBURBS.map(a=>{const o=document.createElement("option");o.value=a;return o}));
 $("q").value="";apply();renderPrevs();
