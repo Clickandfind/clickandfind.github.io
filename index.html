@@ -250,8 +250,6 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
     <div id="closeWrap" hidden><h2>Close matches</h2><div class="grid" id="closeList"></div></div>
     <div id="postWrap" style="margin-top:14px"></div>
   </section>
-  <h2 class="sec" data-i="latest"></h2>
-  <div class="grid" id="latestList"></div>
   <section id="s5" hidden>
     <h2 data-i="wantedH"></h2>
     <div id="wantedList"></div>
@@ -261,6 +259,17 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
     <div id="myReqList"></div>
   </section>
   <details class="note" style="margin-top:28px"><summary><b>About Phomab</b></summary><p style="margin:6px 0 0"> Phomab is a free website for finding houses and rooms to rent in Bulawayo, including Nketha, Magwegwe, Luveve, Pumula and Cowdray Park. Tenants say what they need, landlords list their vacancies with photos, and Phomab matches them so they can chat and agree on the rent.</p></details>
+</main>
+
+<main id="v-browse" hidden>
+  <h1>Rental listings</h1>
+  <p class="lead">Explore available houses and rooms posted by landlords.</p>
+  <div class="panel">
+    <div class="searchbox"><input id="browse-q" type="search" placeholder="Search by area or property type" aria-label="Search listings"><button class="btn" id="browse-search" type="button">Search</button></div>
+  </div>
+  <h2 class="sec">Available homes</h2>
+  <p class="meta" id="browse-count">Loading listings…</p>
+  <div class="grid" id="latestList"></div>
 </main>
 
 <main id="v-list" hidden>
@@ -321,6 +330,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
 
 <nav class="tabbar" role="tablist">
   <button role="tab" id="t-find" aria-selected="true" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span data-i="tabFind"></span></button>
+  <button role="tab" id="t-browse" aria-selected="false" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18M5 10V6l7-3 7 3v4M5 10v10h14V10M9 20v-6h6v6"/></svg><span>Listings</span></button>
   <button role="tab" id="t-list" aria-selected="false" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg><span data-i="tabList"></span></button>
   <button role="tab" id="t-chats" aria-selected="false" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H10l-6 4z"/></svg><span data-i="tabChats"></span><span class="dot" id="chatDot" hidden></span></button>
   <button role="tab" id="t-account" aria-selected="false" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span data-i="tabAccount"></span></button>
@@ -389,7 +399,7 @@ function zoom(src){$("big").querySelector("img").src=src;$("big").hidden=false}
 
 /* ---------- language + tabs ---------- */
 function apply(){document.documentElement.lang=lang;document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=t(e.dataset.ph));$("topAuth").textContent=user?t("tabAccount"):t("signIn");setBadge(unreadN);notifLabel()}
-function tab(w){["find","list","chats","account","desk"].forEach(n=>{$("v-"+n).hidden=n!==w;const b=$("t-"+n);if(b)b.setAttribute("aria-selected",n===w)});window.scrollTo(0,0);if(w==="list")mine();if(w==="chats"&&!user)showAuth(t("login"))}
+function tab(w){["find","browse","list","chats","account","desk"].forEach(n=>{$("v-"+n).hidden=n!==w;const b=$("t-"+n);if(b)b.setAttribute("aria-selected",n===w)});window.scrollTo(0,0);if(w==="list")mine();if(w==="browse")loadHome();if(w==="chats"&&!user)showAuth(t("login"))}
 function showAuth(msg){tab("account");$("amsg").textContent=msg||"";if(!user)$("em").focus()}
 
 /* ---------- understanding requests ---------- */
@@ -685,9 +695,11 @@ $("lang").onchange=e=>{lang=e.target.value;apply()};
 $("topAuth").onclick=()=>user?tab("account"):showAuth("");
 $("signOutBtn").onclick=()=>signOut(auth);
 $("doIn").onclick=()=>authGo(false);$("doUp").onclick=()=>authGo(true);
-["find","list","chats","account"].forEach(n=>$("t-"+n).onclick=()=>tab(n));
+["find","browse","list","chats","account"].forEach(n=>$("t-"+n).onclick=()=>tab(n));
 $("fl-apply").onclick=run;$("fl-clear").onclick=()=>{["fl-type","fl-rooms","fl-min","fl-max","fl-furn"].forEach(i=>$(i).value="");$("fl-sort").value="best";$("found").hidden=true};
 $("go").onclick=run;$("q").addEventListener("keydown",e=>{if(e.key==="Enter")run()});
+$("browse-search").onclick=()=>{const q=$("browse-q").value.trim().toLowerCase();const box=$("latestList");box.textContent="";const rows=(listings||[]).filter(l=>!["taken","unavailable"].includes(String(l.status||"").toLowerCase())&&(!q||[l.title,l.area,l.type].some(v=>String(v||"").toLowerCase().includes(q))));$("browse-count").textContent=rows.length+" available listing(s)";rows.forEach(l=>box.appendChild(card(l)));if(!rows.length)box.appendChild(mk("div","empty","No listings match that search yet."))};
+$("browse-q").addEventListener("keydown",e=>{if(e.key==="Enter")$("browse-search").click()});
 $("save").onclick=save;$("addPhotos").onclick=()=>$("f-photos").click();$("cancelEdit").onclick=resetForm;$("cam").onclick=()=>$("picIn").click();$("f-photos").onchange=e=>{const f=[...e.target.files];e.target.value="";addPhotos(f)};
 async function getPhone(){if(!sheetL)return null;if(!user){closeSheet();showAuth("Sign in to contact the landlord.");return null}
 if(curPhone)return curPhone;try{const sn=await getDoc(doc(db,"listings",sheetL.id,"contact","wa"));curPhone=sn.exists()?sn.data().phone:null}catch(e){alert("Could not load the number: "+e.message);return null}
