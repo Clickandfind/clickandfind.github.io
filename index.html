@@ -426,7 +426,7 @@ function zoom(src){$("big").querySelector("img").src=src;$("big").hidden=false}
 /* ---------- language + tabs ---------- */
 function apply(){document.documentElement.lang=lang;document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=t(e.dataset.ph));$("topAuth").textContent=user?t("tabAccount"):t("signIn");setBadge(unreadN);notifLabel()}
 function tab(w){["find","browse","list","chats","account","desk"].forEach(n=>{$("v-"+n).hidden=n!==w;const b=$("t-"+n);if(b)b.setAttribute("aria-selected",n===w)});window.scrollTo(0,0);if(w==="list")mine();if(w==="browse")loadHome();if(w==="chats"&&!user)showAuth(t("login"))}
-function showAuth(msg){tab("account");$("amsg").textContent=msg||"";if(!user)$("em").focus()}
+function showAuth(msg){if(user){tab("account");return} $("v-welcome").hidden=false;$("v-find").hidden=true;document.querySelector(".tabbar").hidden=true;$("topAuth").hidden=true;$("amsg").textContent=msg||"";window.scrollTo(0,0);$("em").focus()}
 
 /* ---------- understanding requests ---------- */
 const SUBURBS=["Nketha","Magwegwe","Luveve","Pumula","Cowdray Park","Entumbane","Emakhandeni","Mpopoma","Mzilikazi","Makokoba","Lobengula","Njube","Nkulumane","Emganwini","Tshabalala","Sizinda","Pelandaba","Gwabalanda","Barbourfields","Famona","Hillside","Burnside","Kumalo","Suburbs","Queens Park","Bradfield","Matsheumhlope","Waterford","Montrose","Ilanda","Woodlands","Morningside","Riverside","Parklands","Selborne Park","Northend","Newton West","Fortunes Gate","Hyde Park","Glengarry","Mahatshula","Donnington","Rangemore","Raylton","Kingsdale","Thorngrove","Belmont"];
