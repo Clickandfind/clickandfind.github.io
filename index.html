@@ -188,6 +188,29 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
  .panel{padding:13px}
 }
 
+
+/* Find page refresh: rental-first layout inspired by the supplied demo */
+#v-find{padding-top:8px}
+#v-find>h1{font-size:clamp(30px,5vw,46px);margin:8px 0 5px;letter-spacing:-1.2px}
+#v-find>.lead{font-size:15px;max-width:58ch;margin-bottom:18px}
+#v-find .ama-steps{gap:10px;margin:0 0 18px}
+#v-find .ama-step{background:#fff;border:1px solid #dcebe2;border-radius:15px;padding:12px 10px;box-shadow:0 4px 14px rgba(9,70,42,.045)}
+#v-find .ama-step .num{background:#e3f5e9;color:#087849}
+#v-find .ama-step strong{color:#087849}
+#v-find .ama-step span{color:#52708b}
+#v-find>.panel{border:1px solid #dcebe2;box-shadow:0 8px 24px rgba(9,56,40,.06);padding:14px;border-radius:18px}
+#v-find #q{min-height:52px;border-radius:13px;background:#f8fcf9;border-color:#cfe2d5}
+#v-find #go{min-width:92px}
+#v-find h2.sec{margin:24px 0 12px;font-size:22px}
+#v-find .grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:14px}
+#v-find .card{cursor:default;overflow:hidden;border:1px solid #dcebe2;border-radius:17px;box-shadow:0 5px 18px rgba(9,56,40,.065)}
+#v-find .card .pic{aspect-ratio:16/10;background:#edf5ef}
+#v-find .card .cbody{padding:13px;gap:5px}
+#v-find .card .cbody h3{color:#103b63;font-size:17px;line-height:1.3}
+#v-find .card .acts{margin-top:8px;display:grid;grid-template-columns:1fr 1fr}
+#v-find .card .acts button{min-width:0;padding:9px 8px;font-size:13px}
+@media(max-width:520px){#v-find .ama-step{padding:10px 8px}#v-find .ama-step span{font-size:11px}#v-find .grid{grid-template-columns:1fr 1fr;gap:10px}#v-find .card .cbody{padding:10px}#v-find .card .cbody h3{font-size:15px}#v-find .card .acts{grid-template-columns:1fr}#v-find .card .acts button{padding:8px 6px}}
+@media(max-width:360px){#v-find .grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -400,8 +423,10 @@ async function loadListings(){const s=await getDocs(query(collection(db,"listing
 function card(l,why,tag){const c=mk("article","card"),pic=mk("div","pic"),im=l.thumb||l.photo;
 if(im){const i=mk("img");i.src=im;i.alt=l.title;i.loading="lazy";pic.appendChild(i)}else pic.textContent=l.photoCount>0?"Photos":"No photo";
 pic.appendChild(mk("span","badge","$"+l.rent+"/mo"));if(tag)pic.appendChild(mk("span","badge2",tag));else if(l.photoCount>1)pic.appendChild(mk("span","badge2",l.photoCount+" photos"));
-const b=mk("div","cbody");b.append(mk("h3","",l.title),mk("div","meta",l.area+" \u00b7 "+l.rooms+" rooms \u00b7 "+ago(l.createdAt)));if(why)b.appendChild(mk("div","why",why));
-c.append(pic,b);c.onclick=()=>openSheet(l);return c}
+const b=mk("div","cbody");b.append(mk("h3","",l.title),mk("div","meta",l.area+" · "+l.rooms+" rooms · "+ago(l.createdAt)));if(why)b.appendChild(mk("div","why",why));
+const acts=mk("div","acts"),view=mk("button","btn alt sm","View details");view.type="button";view.onclick=e=>{e.stopPropagation();openSheet(l)};acts.appendChild(view);
+if(l.waOn){const wa=mk("button","btn wa sm","WhatsApp landlord");wa.type="button";wa.onclick=e=>{e.stopPropagation();openSheet(l)};acts.appendChild(wa)}
+b.appendChild(acts);c.append(pic,b);c.onclick=()=>openSheet(l);return c}
 async function openSheet(l){sheetL=l;curPhone=null;$("reportBox").hidden=true;$("sheet").hidden=false;document.body.style.overflow="hidden";
 $("shTitle").textContent=l.title;$("shPrice").textContent="$"+l.rent+"/month";$("shMeta").textContent=l.area+" \u00b7 "+l.rooms+" rooms \u00b7 listed "+ago(l.createdAt);$("shDesc").textContent=l.desc||"";$("shCount").textContent="";
 const fc=$("shFacts");fc.textContent="";[l.type,l.rooms+" rooms",l.baths?l.baths+" bathrooms":null,l.furnished===true?"Furnished":l.furnished===false?"Unfurnished":null,l.status==="taken"?"Taken":"Available"].filter(Boolean).forEach(x=>fc.appendChild(mk("span","chip",x)));
