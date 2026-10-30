@@ -1,5 +1,5 @@
-const CACHE_NAME = "phomab-shell-v2";
-const SHELL = ["./", "./index.html", "./offline.html", "./manifest.json"];
+const CACHE_NAME = "phomab-shell-v3";
+const SHELL = ["./", "./index.html", "./offline.html", "./manifest.json", "./phomab-icon-192.svg", "./phomab-icon-512.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)).catch(() => {}).then(() => self.skipWaiting()));
 });
