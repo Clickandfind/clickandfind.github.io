@@ -41,7 +41,9 @@ jobs:
             echo "Android sdkmanager was not found"
             exit 1
           fi
+          set +o pipefail
           yes | "$SDKMANAGER" --licenses
+          set -o pipefail
           "$SDKMANAGER" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Build installable debug APK
