@@ -455,7 +455,19 @@ const by=(a,b)=>b.sc-a.sc||((b.l.createdAt&&b.l.createdAt.toMillis?b.l.createdAt
 return{strict:strict.sort(by),close:close.sort(by)}}
 
 /* ---------- listings ---------- */
-async function loadListings(){const s=await getDocs(query(collection(db,"listings"),orderBy("createdAt","desc"),limit(100)));listings=s.docs.map(d=>({id:d.id,...d.data()})).filter(l=>l.title&&l.area&&l.rooms&&l.rent&&l.owner&&!["taken","hidden"].includes(l.status))}
+let listingsLoadedAt=0,listingsLoadPromise=null;
+async function loadListings(force=false){
+ const now=Date.now();
+ if(!force&&listings.length&&now-listingsLoadedAt<30000)return listings;
+ if(listingsLoadPromise)return listingsLoadPromise;
+ listingsLoadPromise=(async()=>{
+  const snap=await getDocs(query(collection(db,"listings"),orderBy("createdAt","desc"),limit(100)));
+  listings=snap.docs.map(d=>({id:d.id,...d.data()})).filter(l=>l.title&&l.area&&l.rooms&&l.rent&&l.owner&&!["taken","hidden"].includes(l.status));
+  listingsLoadedAt=Date.now();
+  return listings;
+ })();
+ try{return await listingsLoadPromise}finally{listingsLoadPromise=null}
+}
 function card(l,why,tag){const c=mk("article","card"),pic=mk("div","pic"),im=l.thumb||l.photo;
 if(im){const i=mk("img");i.src=im;i.alt=l.title;i.loading="lazy";pic.appendChild(i)}else pic.textContent=l.photoCount>0?"Photos":"No photo";
 pic.appendChild(mk("span","badge","$"+l.rent+"/mo"));if(tag)pic.appendChild(mk("span","badge2",tag));else if(l.photoCount>1)pic.appendChild(mk("span","badge2",l.photoCount+" photos"));
