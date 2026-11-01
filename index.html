@@ -713,13 +713,13 @@ function openHelp(){$("help").hidden=false;document.body.style.overflow="hidden"
 function closeHelp(){$("help").hidden=true;document.body.style.overflow=""}
 
 /* ---------- start ---------- */
-onAuthStateChanged(auth,u=>{user=u;$("v-welcome").hidden=!!u;$("v-find").hidden=!u;document.querySelector(".tabbar").hidden=!u;$("topAuth").hidden=!!u;$("meBox").hidden=!u;$("meEmail").textContent=u?u.email:"";apply();
-if(!u){unreadN=0;lastDocs=[];setBadge(0);if(unsubChats)unsubChats();closeChat();$("chatList").textContent="";if(location.hash==="#desk")showAuth("Sign in to open Phomab desk.")}
+onAuthStateChanged(auth,u=>{user=u;const welcome=$("v-welcome"),findView=$("v-find"),tabbar=document.querySelector(".tabbar"),topAuth=$("topAuth"),meBox=$("meBox"),meEmail=$("meEmail");if(welcome)welcome.hidden=!!u;if(findView)findView.hidden=!u;if(tabbar)tabbar.hidden=!u;if(topAuth)topAuth.hidden=!!u;if(meBox)meBox.hidden=!u;if(meEmail)meEmail.textContent=u?u.email:"";apply();
+if(!u){unreadN=0;lastDocs=[];setBadge(0);if(unsubChats)unsubChats();closeChat();const chatList=$("chatList");if(chatList)chatList.textContent="";if(location.hash==="#desk")showAuth("Sign in to open Phomab desk.")}
 else{watchChats();loadMyNumber();if(location.hash==="#desk")showDesk()}
 loadHome()});
 $("lang").onchange=e=>{lang=e.target.value;apply()};
 $("topAuth").onclick=()=>user?tab("account"):showAuth("");
-$("signOutBtn").onclick=()=>signOut(auth);
+const signOutBtn=$("signOutBtn");if(signOutBtn)signOutBtn.onclick=()=>signOut(auth);
 $("doIn").onclick=()=>authGo(false);$("doUp").onclick=()=>authGo(true);
 ["find","browse","list","chats","account"].forEach(n=>$("t-"+n).onclick=()=>tab(n));
 $("fl-apply").onclick=run;$("fl-clear").onclick=()=>{["fl-type","fl-rooms","fl-min","fl-max","fl-furn"].forEach(i=>$(i).value="");$("fl-sort").value="best";$("found").hidden=true};
