@@ -241,7 +241,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
 #v-find #found{margin-top:20px}
 #v-welcome[hidden],#v-find[hidden]{display:none!important}
 @media(max-width:520px){#v-welcome{padding:18px 0 30px}.welcome-logo{width:min(68%,250px)}.welcome-auth{padding:16px}#v-find{padding-top:14px}#v-find .find-search{padding:12px}}
-</style>
+\n.video-call-btn{flex:none;background:#159b62!important;color:#fff!important;border:0!important;border-radius:10px;padding:9px 12px!important;font-size:13px!important;font-weight:800;white-space:nowrap}.video-call-btn:disabled{opacity:.55}\n</style>
 </head>
 <body>
 <noscript><p style="padding:16px">Phomab needs JavaScript to run. Phomab helps you find a house to rent in Bulawayo.</p></noscript>
@@ -376,7 +376,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
 </div>
 
 <div id="chatScreen" hidden>
-  <div class="cs-top"><button id="csBack" type="button" aria-label="Back">←</button><div><div class="t1" id="chat-h"></div></div></div>
+  <div class="cs-top"><button id="csBack" type="button" aria-label="Back">←</button><div style="flex:1;min-width:0"><div class="t1" id="chat-h"></div></div><button id="videoCallBtn" class="video-call-btn" type="button" aria-label="Start video call" title="Start video call">Video call</button></div>
   <div class="deal" id="deal" hidden></div>
   <div id="msgs" aria-live="polite"></div>
   <div class="recbar" id="recBar" hidden><span>● Recording… tap Voice note to send</span><button class="btn alt sm" id="micCancel" type="button">Cancel</button></div>
@@ -616,7 +616,7 @@ function closeChat(){if(rec)stopRec(false);curChat=null;curMembers=[];if(unsubMs
 function maybeAlert(){const to=(curMembers||[]).find(m=>m!==user.uid);if(!to||!curChat)return;const k="phb_al_"+curChat;let last=0;try{last=+localStorage.getItem(k)||0}catch(e){}
 if(Date.now()-last<20*60*1000)return;try{localStorage.setItem(k,String(Date.now()))}catch(e){}
 addDoc(collection(db,"alerts"),{chatId:curChat,to,from:user.uid,title:($("chat-h").textContent||"").slice(0,120),status:"pending",createdAt:serverTimestamp()}).catch(()=>{})}
-async function post(data){if(!curChat||!user)return;try{await addDoc(collection(db,"chats",curChat,"messages"),{from:user.uid,at:serverTimestamp(),...data});maybeAlert();
+async function startVideoCall(){if(!curChat||!user){alert("Open a PHOMAB chat before starting a video call.");return}const btn=$("videoCallBtn");if(btn)btn.disabled=true;try{const bytes=new Uint8Array(18);if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(bytes);else for(let i=0;i<bytes.length;i++)bytes[i]=Math.floor(Math.random()*256);const token=Array.from(bytes,x=>x.toString(16).padStart(2,"0")).join("");const room="PHOMAB-"+token;const url="https://meet.jit.si/"+room;const win=window.open(url,"_blank","noopener,noreferrer");await post({text:"I started a PHOMAB video call. Join me here: "+url});if(!win)alert("The call link was sent in this chat, but your browser blocked the new tab. Open the link in the chat to join.");}catch(e){alert("Could not start the video call. Please try again.")}finally{if(btn)btn.disabled=false}}\nasync function post(data){if(!curChat||!user)return;try{await addDoc(collection(db,"chats",curChat,"messages"),{from:user.uid,at:serverTimestamp(),...data});maybeAlert();
 updateDoc(doc(db,"chats",curChat),{updatedAt:serverTimestamp(),lastFrom:user.uid,lastText:data.text?data.text.slice(0,80):data.offer?"Offer: $"+data.offer:data.image?"Photo":data.audio?"Voice note":"New message"}).catch(()=>{})}catch(e){alert("Could not send: "+e.message)}}
 async function sendMsg(){const v=$("msg").value.trim();if(!v)return;$("msg").value="";post({text:v})}
 async function sendOffer(){const v=+$("offer").value;if(!v)return;$("offer").value="";$("offerRow").hidden=true;post({offer:v})}
@@ -749,7 +749,7 @@ $("shReport").onclick=()=>{if(!user){closeSheet();showAuth("Sign in to report a 
 $("rp-cancel").onclick=()=>{$("reportBox").hidden=true};
 $("rp-send").onclick=async()=>{if(!sheetL)return;try{await addDoc(collection(db,"reports"),{listingId:sheetL.id,title:String(sheetL.title).slice(0,100),reason:$("rp-reason").value,note:$("rp-note").value.trim().slice(0,300),uid:user.uid,status:"open",createdAt:serverTimestamp()});$("rp-note").value="";$("reportBox").hidden=true;alert("Thank you. Phomab will review this listing.")}catch(e){alert("Could not send the report: "+e.message)}};
 $("shBack").onclick=closeSheet;$("shChat").onclick=()=>{if(sheetL)startChat(sheetL)};$("shShare").onclick=()=>{if(sheetL)wa(shareText(sheetL))};
-$("csBack").onclick=closeChat;$("plus").onclick=()=>{$("tools").hidden=!$("tools").hidden};
+$("csBack").onclick=closeChat;$("videoCallBtn").onclick=startVideoCall;$("plus").onclick=()=>{$("tools").hidden=!$("tools").hidden};
 $("send").onclick=sendMsg;$("msg").addEventListener("keydown",e=>{if(e.key==="Enter")sendMsg()});
 $("offerBtn").onclick=()=>{$("offerRow").hidden=!$("offerRow").hidden;if(!$("offerRow").hidden)$("offer").focus()};
 $("mkoffer").onclick=sendOffer;$("offer").addEventListener("keydown",e=>{if(e.key==="Enter")sendOffer()});
