@@ -515,12 +515,30 @@ if(own){const eb=mk("button","btn alt sm","Edit");eb.type="button";eb.style.cssT
 b.onclick=own?async()=>{try{await updateDoc(doc(db,"wanted",w.id),{status:"closed"});loadHome()}catch(e){alert(e.message)}}:()=>startWantedChat(w);if(!own&&w.waOn){const wb=mk("button","btn sm","Chat on WhatsApp");wb.type="button";wb.style.cssText="margin:8px 8px 0 0";b.className="btn alt sm";
 wb.onclick=async()=>{if(!user){showAuth("Sign in to chat on WhatsApp.");return}try{const sn=await getDoc(doc(db,"wanted",w.id,"contact","wa"));const p=sn.exists()?sn.data().phone:null;if(!p){alert("No number shared.");return}window.open("https://wa.me/"+waNum(p)+"?text="+encodeURIComponent("Hi, I saw your request on Phomab: "+wantSummary(w)+". I may have a house for you."),"_blank")}catch(e){alert("Could not open WhatsApp: "+e.message)}};c.append(wb)}
 c.append(b);return c}
+let homeLoadPromise=null;
 async function loadHome(){
-try{await loadListings();const box=$("latestList");box.textContent="";const arr=listings.slice(0,8);if(!arr.length)box.appendChild(mk("div","empty","No vacancies yet."));arr.forEach(l=>box.appendChild(card(l)))}catch(e){}
-try{const s=await getDocs(query(collection(db,"wanted"),orderBy("createdAt","desc"),limit(30)));const all=s.docs.map(d=>({id:d.id,...d.data()})).filter(w=>w.status==="open"&&w.q);
-const box=$("wantedList");box.textContent="";$("s5").hidden=false;const pub=all.filter(w=>!user||w.uid!==user.uid).slice(0,8);
-if(!pub.length)box.appendChild(mk("div","empty","No tenant requests yet."));pub.forEach(w=>box.appendChild(wantedCard(w,false)));
-const own=user?all.filter(w=>w.uid===user.uid):[];$("s6").hidden=!own.length;const mb=$("myReqList");mb.textContent="";own.forEach(w=>mb.appendChild(wantedCard(w,true)))}catch(e){}}
+ if(homeLoadPromise)return homeLoadPromise;
+ homeLoadPromise=(async()=>{
+  const listingTask=loadListings().then(()=>{
+   const box=$("latestList");box.textContent="";
+   const arr=listings.slice(0,8);
+   if(!arr.length)box.appendChild(mk("div","empty","No vacancies yet."));
+   arr.forEach(l=>box.appendChild(card(l)));
+  }).catch(()=>{});
+  const wantedTask=getDocs(query(collection(db,"wanted"),orderBy("createdAt","desc"),limit(30))).then(s=>{
+   const all=s.docs.map(d=>({id:d.id,...d.data()})).filter(w=>w.status==="open"&&w.q);
+   const box=$("wantedList");box.textContent="";$("s5").hidden=false;
+   const pub=all.filter(w=>!user||w.uid!==user.uid).slice(0,8);
+   if(!pub.length)box.appendChild(mk("div","empty","No tenant requests yet."));
+   pub.forEach(w=>box.appendChild(wantedCard(w,false)));
+   const own=user?all.filter(w=>w.uid===user.uid):[];
+   $("s6").hidden=!own.length;const mb=$("myReqList");mb.textContent="";
+   own.forEach(w=>mb.appendChild(wantedCard(w,true)));
+  }).catch(()=>{});
+  await Promise.all([listingTask,wantedTask]);
+ })();
+ try{await homeLoadPromise}finally{homeLoadPromise=null}
+}
 
 /* ---------- list a vacancy ---------- */
 function renderPrevs(){const p=$("prevs");p.textContent="";
