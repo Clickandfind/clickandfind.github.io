@@ -440,6 +440,49 @@ m=s.match(/between\s*\$?\s*(\d{2,5})\s*(?:and|to|-)\s*\$?\s*(\d{2,5})/)||s.match
 if(m){o.min=Math.min(+m[1],+m[2]);o.max=Math.max(+m[1],+m[2])}
 else{m=s.match(/(?:under|below|max|maximum|up to|upto|not more than|less than|within|budget(?: is| of)?|around|about)\s*\$?\s*(\d{2,5})/)||s.match(/\$\s*(\d{2,5})/)||s.match(/(\d{2,5})\s*(?:usd|dollars|us\$|\$|per month|pm|a month)/);if(m&&+m[1]>=20)o.max=+m[1]}
 const names=[...new Set(SUBURBS.concat(extraAreas||[]))];
+names.forEach(a=>{const re=new RegExp("(^|[^a-z])"+a.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,"\\<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,addDoc,getDocs,getDoc,setDoc,query,where,orderBy,onSnapshot,doc,updateDoc,deleteDoc,serverTimestamp,limit} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyB5NIgSzcINTZEeoM7RE3NgcqeDydvAsyE",authDomain:"pmata-26d51.firebaseapp.com",projectId:"pmata-26d51"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+
+const T={
+en:{tabFind:"Find",tabList:"List",tabChats:"Chats",tabAccount:"Account",signIn:"Sign in",signUp:"Create account",signOut:"Sign out",find:"Find",ph:"2 rooms, Nketha, under $150",msgPh:"Write a message",offerPh:"Offer in $",send:"Send",latest:"Latest vacancies",wantedH:"Tenants looking for a house",myReq:"Your requests",listTitle:"List a vacancy",save:"Save vacancy",mine:"Your vacancies",shareWA:"Share on WhatsApp",shareApp:"Share Phomab on WhatsApp",view:"Chat on Phomab",notif:"Turn on message alerts",notifOn:"Message alerts are on",markTaken:"Mark as taken",backAvail:"Make available again",takenWord:"Taken",login:"Sign in to continue.",postReq:"Post my request",posted:"Posted",contact:"Contact tenant",closeReq:"Close request",note:"Always view a house in person before paying anything."},
+nd:{tabFind:"Funa",tabList:"Beka",tabChats:"Izingxoxo",tabAccount:"I-akhawunti",signIn:"Ngena",signUp:"Vula i-akhawunti",signOut:"Phuma",find:"Funa",send:"Thumela",save:"Gcina",listTitle:"Beka indlu etholakalayo",mine:"Izindlu zakho"},
+sn:{tabFind:"Tsvaga",tabList:"Isa",tabChats:"Hurukuro",tabAccount:"Account",signIn:"Pinda",signUp:"Vhura account",signOut:"Buda",find:"Tsvaga",send:"Tumira",save:"Chengeta",listTitle:"Isa imba iripo",mine:"Dzimba dzako"}};
+let lang="en",user=null,listings=[],curChat=null,unsubMsgs=null,unsubChat=null,unsubChats=null,unreadN=0,firstSnap=true,lastDocs=[],swReg=null,lastSeen={},curMembers=[],curListing=null,curPhone=null,sheetL=null,pend=[],editId=null,removedIds=[],myNumber="",rec=null,recChunks=[],recTimer=null,recStart=0;
+try{lastSeen=JSON.parse(localStorage.getItem("phb_seen")||"{}")}catch(e){}
+const t=k=>(T[lang]&&T[lang][k])||T.en[k]||"";
+const $=id=>document.getElementById(id);
+const mk=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e};
+const base=()=>location.origin+location.pathname;
+const ago=ts=>{const m=ts&&ts.toMillis?ts.toMillis():Date.now(),d=Math.floor((Date.now()-m)/86400000);return d<1?"today":d===1?"yesterday":d+" days ago"};
+const fmtTime=ts=>{const d=ts&&ts.toDate?ts.toDate():new Date();return d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})};
+const ms=c=>c&&c.updatedAt&&c.updatedAt.toMillis?c.updatedAt.toMillis():Date.now();
+function waNum(p){let d=String(p).replace(/\D/g,"");if(d.startsWith("0"))d="263"+d.slice(1);return d}
+function wa(text){window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank")}
+function shrink(file,max,q){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const r=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",q))};img.onerror=()=>rej(new Error("Could not read that photo"));img.src=u})}
+function thumbFromData(src){return new Promise(res=>{const img=new Image();img.onload=()=>{const r=Math.min(1,360/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);c.getContext("2d").drawImage(img,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.6))};img.onerror=()=>res(null);img.src=src})}
+function validNum(p){const d=waNum(p||"");return d.length>=11&&d.length<=13?d:null}
+function zoom(src){$("big").querySelector("img").src=src;$("big").hidden=false}
+
+/* ---------- language + tabs ---------- */
+function apply(){document.documentElement.lang=lang;document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=t(e.dataset.ph));$("topAuth").textContent=user?t("tabAccount"):t("signIn");setBadge(unreadN);notifLabel()}
+function tab(w){["find","browse","list","chats","account","desk"].forEach(n=>{$("v-"+n).hidden=n!==w;const b=$("t-"+n);if(b)b.setAttribute("aria-selected",n===w)});window.scrollTo(0,0);if(w==="list")mine();if(w==="browse")loadHome();if(w==="chats"&&!user)showAuth(t("login"))}
+function showAuth(msg){if(user){tab("account");return} $("v-welcome").hidden=false;$("v-find").hidden=true;document.querySelector(".tabbar").hidden=true;$("topAuth").hidden=true;$("amsg").textContent=msg||"";window.scrollTo(0,0);$("em").focus()}
+
+/* ---------- understanding requests ---------- */
+const SUBURBS=["Nketha","Magwegwe","Luveve","Pumula","Cowdray Park","Entumbane","Emakhandeni","Mpopoma","Mzilikazi","Makokoba","Lobengula","Njube","Nkulumane","Emganwini","Tshabalala","Sizinda","Pelandaba","Gwabalanda","Barbourfields","Famona","Hillside","Burnside","Kumalo","Suburbs","Queens Park","Bradfield","Matsheumhlope","Waterford","Montrose","Ilanda","Woodlands","Morningside","Riverside","Parklands","Selborne Park","Northend","Newton West","Fortunes Gate","Hyde Park","Glengarry","Mahatshula","Donnington","Rangemore","Raylton","Kingsdale","Thorngrove","Belmont"];
+const NUM={one:1,two:2,three:3,four:4,five:5,six:6,single:1};
+const FEAT={borehole:["borehole","bore hole"],solar:["solar","inverter"],tiled:["tiled","tiles"],fenced:["fenced","fence","walled"],yard:["yard"],garage:["garage","carport"],furnished:["furnished"],cottage:["cottage"],flat:["flat","apartment"],"near shops":["shops","shopping"],"near school":["school"],"near transport":["bus","kombi","main road","transport"]};
+function understand(q,extraAreas){const s=" "+q.toLowerCase().replace(/[,;]/g," ")+" ",o={rooms:null,min:null,max:null,areas:[],feats:[]};
+let m=s.match(/(\d+|one|two|three|four|five|six|single)[\s-]*(?:roomed|rooms?|bedroomed|bedrooms?|beds?\b|kamba|amakamelo|makamuri)/);if(m)o.rooms=isNaN(m[1])?NUM[m[1]]:+m[1];
+m=s.match(/between\s*\$?\s*(\d{2,5})\s*(?:and|to|-)\s*\$?\s*(\d{2,5})/)||s.match(/\$?\s*(\d{2,5})\s*(?:to|-)\s*\$?\s*(\d{2,5})\s*(?:usd|dollars|\$|per month|pm|a month)/);
+if(m){o.min=Math.min(+m[1],+m[2]);o.max=Math.max(+m[1],+m[2])}
+else{m=s.match(/(?:under|below|max|maximum|up to|upto|not more than|less than|within|budget(?: is| of)?|around|about)\s*\$?\s*(\d{2,5})/)||s.match(/\$\s*(\d{2,5})/)||s.match(/(\d{2,5})\s*(?:usd|dollars|us\$|\$|per month|pm|a month)/);if(m&&+m[1]>=20)o.max=+m[1]}
+const names=[...new Set(SUBURBS.concat(extraAreas||[]))];
 names.forEach(a=>{const re=new RegExp("(^|[^a-z])"+a.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"([^a-z]|$)");if(re.test(s)&&!o.areas.includes(a))o.areas.push(a)});
 Object.keys(FEAT).forEach(f=>{if(FEAT[f].some(w=>s.includes(w)))o.feats.push(f)});
 return o}
@@ -727,6 +770,368 @@ function ask(q){
 "+sample+(found.length>4?"\
 Open Find to see more.":"")+"\
 Confirm availability and details with the landlord before paying.", "l", [["Open matching listings",()=>{closeHelp();tab("find");$("q").value=q;run()}]]);return;\n   }\n   helpSay("I couldn't find a matching listing in the data currently loaded. That doesn't prove no house exists—try widening the area or budget, or open Find to check the latest results.", "l", [["Search PHOMAB",()=>{closeHelp();tab("find");$("q").value=q;run()}]]);return;\n }\n if(!howq&&(o.rooms||o.areas.length||o.max||o.min||o.feats.length)){\n   helpSay("I understood your request as: "+chipsFor(o).join(", ")+". I'll use it to search PHOMAB listings.", "l", [["Find matches",()=>{closeHelp();tab("find");$("q").value=q;run()}]]);return;\n }\n const extras=[\n  {k:["phomab mean","meaning of phomab","stands for","full form","what is phomab"],a:"PHOMAB stands for Pristine Homes Offering More Affordable Blending. Describe the home you need, match with available listings, then contact the landlord to agree on details."},\n  {k:["no listings","nothing showing","empty","no houses"],a:"If no homes appear, try a nearby suburb, widen your budget, or remove some filters. Listings depend on landlords adding genuine vacancies, so confirm availability directly."},\n  {k:["ai","artificial intelligence","smart assistant"],a:"I can interpret rental needs, guide you around PHOMAB, and answer some questions using listing information currently loaded on the site. New listings or changes may not appear until the site loads updated data."},\n  {k:["deposit","pay first","send money","payment before viewing"],a:"Do not send a deposit before viewing the property and checking that the person is authorised to rent it out. Verify the details and keep a record of any agreement."}\n ];\n let best=null,bs=0;\n [...extras,...KB].forEach(e=>{let sc=0;e.k.forEach(w=>{if(s.includes(w))sc+=w.length>6?3:w.length>3?2:1});if(sc>bs){bs=sc;best=e}});\n if(best&&bs>0){helpSay(best.a,"l",best.go);return}\n helpSay("I haven't found a confident answer to that yet. I can help you search rentals, understand matching, list a vacancy, contact landlords, stay safe, or manage your account. For current availability, check Find and confirm with the landlord.", "l", [["Find a house",()=>{closeHelp();tab("find")}],["List a vacancy",()=>{closeHelp();tab("list")}],["Account help",()=>{closeHelp();tab("account")}]])\n}\nfunction openHelp(){$("help").hidden=false;document.body.style.overflow="hidden";if(!$("hmsgs").children.length)helpSay("Hi! I\u2019m Phomab Help.\nAsk me how to use Phomab, or tell me the house you need.","l")}\nfunction closeHelp(){$("help").hidden=true;document.body.style.overflow=""}\n\n/* ---------- start ---------- */\nonAuthStateChanged(auth,u=>{user=u;const welcome=$("v-welcome"),findView=$("v-find"),tabbar=document.querySelector(".tabbar"),topAuth=$("topAuth"),meBox=$("meBox"),meEmail=$("meEmail");if(welcome)welcome.hidden=!!u;if(findView)findView.hidden=!u;if(tabbar)tabbar.hidden=!u;if(topAuth)topAuth.hidden=!!u;if(meBox)meBox.hidden=!u;if(meEmail)meEmail.textContent=u?u.email:"";apply();\nif(!u){unreadN=0;lastDocs=[];setBadge(0);if(unsubChats)unsubChats();closeChat();const chatList=$("chatList");if(chatList)chatList.textContent="";if(location.hash==="#desk")showAuth("Sign in to open Phomab desk.")}\nelse{watchChats();loadMyNumber();if(location.hash==="#desk")showDesk()}\nloadHome()});\n$("lang").onchange=e=>{lang=e.target.value;apply()};\n$("topAuth").onclick=()=>user?tab("account"):showAuth("");\nconst signOutBtn=$("signOutBtn");if(signOutBtn)signOutBtn.onclick=()=>signOut(auth);\n$("doIn").onclick=()=>authGo(false);$("doUp").onclick=()=>authGo(true);\n["find","browse","list","chats","account"].forEach(n=>$("t-"+n).onclick=()=>tab(n));\n$("fl-apply").onclick=run;$("fl-clear").onclick=()=>{["fl-type","fl-rooms","fl-min","fl-max","fl-furn"].forEach(i=>$(i).value="");$("fl-sort").value="best";$("found").hidden=true};\n$("go").onclick=run;$("q").addEventListener("keydown",e=>{if(e.key==="Enter")run()});\n$("browse-search").onclick=()=>{const q=$("browse-q").value.trim().toLowerCase();const box=$("latestList");box.textContent="";const rows=(listings||[]).filter(l=>!["taken","unavailable"].includes(String(l.status||"").toLowerCase())&&(!q||[l.title,l.area,l.type].some(v=>String(v||"").toLowerCase().includes(q))));$("browse-count").textContent=rows.length+" available listing(s)";rows.forEach(l=>box.appendChild(card(l)));if(!rows.length)box.appendChild(mk("div","empty","No listings match that search yet."))};\n$("browse-q").addEventListener("keydown",e=>{if(e.key==="Enter")$("browse-search").click()});\n$("save").onclick=save;$("addPhotos").onclick=()=>$("f-photos").click();$("cancelEdit").onclick=resetForm;$("cam").onclick=()=>$("picIn").click();$("f-photos").onchange=e=>{const f=[...e.target.files];e.target.value="";addPhotos(f)};\nasync function getPhone(){if(!sheetL)return null;if(!user){closeSheet();showAuth("Sign in to contact the landlord.");return null}\nif(curPhone)return curPhone;try{const sn=await getDoc(doc(db,"listings",sheetL.id,"contact","wa"));curPhone=sn.exists()?sn.data().phone:null}catch(e){alert("Could not load the number: "+e.message);return null}\nif(!curPhone)alert("This landlord has not shared a number.");return curPhone}\n$("shWa").onclick=async()=>{const p=await getPhone();if(!p)return;const d=validNum(p);if(!d){alert("This number looks invalid. Try calling or chat in Phomab.");return}\nwindow.open("https://wa.me/"+d+"?text="+encodeURIComponent("Hello, I found your property on PHOMAB. Is it still available?\n"+sheetL.title+" ("+sheetL.area+", $"+sheetL.rent+"/month)"),"_blank")};
+$("shCall").onclick=async()=>{const p=await getPhone();if(!p)return;const d=validNum(p);if(!d){alert("This number looks invalid. Try chat in Phomab.");return}location.href="tel:+"+d};
+$("shReport").onclick=()=>{if(!user){closeSheet();showAuth("Sign in to report a listing.");return}$("reportBox").hidden=!$("reportBox").hidden};
+$("rp-cancel").onclick=()=>{$("reportBox").hidden=true};
+$("rp-send").onclick=async()=>{if(!sheetL)return;try{await addDoc(collection(db,"reports"),{listingId:sheetL.id,title:String(sheetL.title).slice(0,100),reason:$("rp-reason").value,note:$("rp-note").value.trim().slice(0,300),uid:user.uid,status:"open",createdAt:serverTimestamp()});$("rp-note").value="";$("reportBox").hidden=true;alert("Thank you. Phomab will review this listing.")}catch(e){alert("Could not send the report: "+e.message)}};
+$("shBack").onclick=closeSheet;$("shChat").onclick=()=>{if(sheetL)startChat(sheetL)};$("shShare").onclick=()=>{if(sheetL)wa(shareText(sheetL))};
+$("csBack").onclick=closeChat;$("videoCallBtn").onclick=startVideoCall;$("plus").onclick=()=>{$("tools").hidden=!$("tools").hidden};
+$("send").onclick=sendMsg;$("msg").addEventListener("keydown",e=>{if(e.key==="Enter")sendMsg()});
+$("offerBtn").onclick=()=>{$("offerRow").hidden=!$("offerRow").hidden;if(!$("offerRow").hidden)$("offer").focus()};
+$("mkoffer").onclick=sendOffer;$("offer").addEventListener("keydown",e=>{if(e.key==="Enter")sendOffer()});
+$("mic").onclick=toggleRec;$("micCancel").onclick=()=>stopRec(false);
+$("pic").onclick=()=>$("picIn").click();
+$("picIn").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f||!curChat)return;try{let d=await shrink(f,900,.72);if(d.length>700000)d=await shrink(f,700,.6);if(d.length>700000){alert("Photo too large.");return}post({image:d})}catch(x){alert(x.message)}};
+$("takenBtn").onclick=async()=>{if(!curListing)return;if(!confirm("Mark this house as taken? It will stop showing in searches."))return;try{await updateDoc(doc(db,"listings",curListing),{status:"taken"});$("takenBtn").hidden=true;alert("Done. This house is taken and no longer shows in searches.")}catch(e){alert(e.message)}};
+$("saveWa").onclick=saveMyNumber;$("deskRefresh").onclick=loadDesk;
+$("shareApp").onclick=()=>wa("Looking for a house, or have one to rent? Tell Phomab what you need and get matched with landlords in Bulawayo: "+base());
+$("notifBtn").onclick=()=>{Notification.requestPermission().then(()=>notifLabel())};
+$("big").onclick=()=>{$("big").hidden=true};
+$("helpFab").onclick=openHelp;$("helpBack").onclick=closeHelp;
+$("hsend").onclick=()=>{const v=$("hin").value;$("hin").value="";ask(v)};$("hin").addEventListener("keydown",e=>{if(e.key==="Enter"){const v=$("hin").value;$("hin").value="";ask(v)}});
+["How do I find a house?","How do I list a house?","How do I add photos?","How does chat work?","Is it safe?","How do alerts work?"].forEach(x=>{const b=mk("button","btn alt sm",x);b.type="button";b.onclick=()=>ask(x);$("hchips").appendChild(b)});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){const d=lastDocs.find(x=>x.id===curChat);if(d)markSeen(d.id,d.data());renderChats()}});
+
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",event=>{
+ event.preventDefault(); deferredInstallPrompt=event;
+ if(document.getElementById("phomabInstall")) return;
+ const b=document.createElement("button"); b.id="phomabInstall"; b.type="button"; b.textContent="Install PHOMAB";
+ b.setAttribute("aria-label","Install PHOMAB on this device");
+ b.style.cssText="position:fixed;right:16px;top:72px;z-index:1000;border:0;border-radius:999px;padding:12px 18px;background:#0B477F;color:#fff;font-weight:800;box-shadow:0 4px 16px #0003";
+ b.addEventListener("click",async()=>{if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;b.remove()});
+ document.body.appendChild(b);
+});
+window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;document.getElementById("phomabInstall")?.remove()});
+
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").then(r=>{swReg=r}).catch(()=>{});
+$("areas").append(...SUBURBS.map(a=>{const o=document.createElement("option");o.value=a;return o}));
+$("q").value="";apply();renderPrevs();
+const EX=["3 roomed house in Nketha","2 rooms in Luveve under $130","4 rooms Magwegwe with borehole"];
+EX.forEach(s=>{const b=mk("button","chip",s);b.type="button";b.onclick=()=>{$("q").value=s;run()};$("chips").appendChild(b)});
+$("boot").remove();
+</script>")+"([^a-z]|$)");if(re.test(s)&&!o.areas.includes(a))o.areas.push(a)});
+Object.keys(FEAT).forEach(f=>{if(FEAT[f].some(w=>s.includes(w)))o.feats.push(f)});
+return o}
+function chipsFor(o){const c=[];if(o.rooms)c.push(o.rooms+" room"+(o.rooms>1?"s":""));o.areas.forEach(a=>c.push(a));if(o.min&&o.max)c.push("$"+o.min+" to $"+o.max);else if(o.max)c.push("up to $"+o.max);o.feats.forEach(f=>c.push(f));return c}
+function rank(list,o){const A=o.areas.map(a=>a.toLowerCase()),strict=[],close=[];
+list.forEach(l=>{let sc=0,why=[],miss=[],hard=false;const txt=(l.title+" "+(l.desc||"")).toLowerCase();
+if(A.length){if(A.includes(l.area.toLowerCase())){sc+=4;why.push(l.area)}else miss.push("In "+l.area+" (you asked "+o.areas.join(" or ")+")")}
+if(o.rooms){if(l.rooms===o.rooms){sc+=3;why.push(l.rooms+" rooms")}else if(Math.abs(l.rooms-o.rooms)===1)miss.push(l.rooms+" rooms (you asked "+o.rooms+")");else hard=true}
+if(o.max){if(l.rent<=o.max){sc+=3;why.push("within budget")}else if(l.rent<=o.max*1.2)miss.push("$"+(l.rent-o.max)+" over your budget");else hard=true}
+if(o.min&&l.rent<o.min)hard=true;
+o.feats.forEach(f=>{if(FEAT[f].some(w=>txt.includes(w))){sc+=1;why.push(f)}});
+const row={l,sc,why:why.join(", "),note:miss[0]};
+if(!hard&&!miss.length)strict.push(row);else if(!hard&&miss.length===1)close.push(row)});
+const by=(a,b)=>b.sc-a.sc||((b.l.createdAt&&b.l.createdAt.toMillis?b.l.createdAt.toMillis():0)-(a.l.createdAt&&a.l.createdAt.toMillis?a.l.createdAt.toMillis():0));
+return{strict:strict.sort(by),close:close.sort(by)}}
+
+/* ---------- listings ---------- */
+let listingsLoadedAt=0,listingsLoadPromise=null;
+async function loadListings(force=false){
+ const now=Date.now();
+ if(!force&&listings.length&&now-listingsLoadedAt<30000)return listings;
+ if(listingsLoadPromise)return listingsLoadPromise;
+ listingsLoadPromise=(async()=>{
+  const snap=await getDocs(query(collection(db,"listings"),orderBy("createdAt","desc"),limit(100)));
+  listings=snap.docs.map(d=>({id:d.id,...d.data()})).filter(l=>l.title&&l.area&&l.rooms&&l.rent&&l.owner&&!["taken","hidden"].includes(l.status));
+  listingsLoadedAt=Date.now();
+  return listings;
+ })();
+ try{return await listingsLoadPromise}finally{listingsLoadPromise=null}
+}
+function card(l,why,tag){const c=mk("article","card"),pic=mk("div","pic"),im=l.thumb||l.photo;
+if(im){const i=mk("img");i.src=im;i.alt=l.title;i.loading="lazy";pic.appendChild(i)}else pic.textContent=l.photoCount>0?"Photos":"No photo";
+pic.appendChild(mk("span","badge","$"+l.rent+"/mo"));if(tag)pic.appendChild(mk("span","badge2",tag));else if(l.photoCount>1)pic.appendChild(mk("span","badge2",l.photoCount+" photos"));
+const b=mk("div","cbody");b.append(mk("h3","",l.title),mk("div","meta",l.area+" · "+l.rooms+" rooms · "+ago(l.createdAt)));if(why)b.appendChild(mk("div","why",why));
+const acts=mk("div","acts"),view=mk("button","btn alt sm","View details");view.type="button";view.onclick=e=>{e.stopPropagation();openSheet(l)};acts.appendChild(view);
+if(l.waOn){const wa=mk("button","btn wa sm","WhatsApp landlord");wa.type="button";wa.onclick=e=>{e.stopPropagation();openSheet(l)};acts.appendChild(wa)}
+b.appendChild(acts);c.append(pic,b);c.onclick=()=>openSheet(l);return c}
+async function openSheet(l){sheetL=l;curPhone=null;$("reportBox").hidden=true;$("sheet").hidden=false;document.body.style.overflow="hidden";
+$("shTitle").textContent=l.title;$("shPrice").textContent="$"+l.rent+"/month";$("shMeta").textContent=l.area+" \u00b7 "+l.rooms+" rooms \u00b7 listed "+ago(l.createdAt);$("shDesc").textContent=l.desc||"";$("shCount").textContent="";
+const fc=$("shFacts");fc.textContent="";[l.type,l.rooms+" rooms",l.baths?l.baths+" bathrooms":null,l.furnished===true?"Furnished":l.furnished===false?"Unfurnished":null,l.status==="taken"?"Taken":"Available"].filter(Boolean).forEach(x=>fc.appendChild(mk("span","chip",x)));
+$("shContact").hidden=!l.waOn;$("shNum").textContent=user?"Loading\u2026":"Sign in to see the number";
+if(l.waOn&&user)getDoc(doc(db,"listings",l.id,"contact","wa")).then(x=>{if(sheetL===l){curPhone=x.exists()?x.data().phone:null;$("shNum").textContent=curPhone||"Number not available"}}).catch(()=>{if(sheetL===l)$("shNum").textContent="Number not available"});
+const g=$("gal");g.textContent="";g.scrollLeft=0;g.onscroll=null;const add=src=>{const i=mk("img");i.src=src;i.alt=l.title;i.onclick=()=>zoom(src);g.appendChild(i)},first=l.thumb||l.photo;
+if(first)add(first);else g.appendChild(mk("div","nopic","No photo"));
+if(l.photoCount>0){try{const s=await getDocs(query(collection(db,"listings",l.id,"photos"),orderBy("i")));if(sheetL===l&&s.size){g.textContent="";s.docs.forEach(d=>add(d.data().data));const tot=s.size;$("shCount").textContent=tot>1?"1/"+tot:"";g.onscroll=()=>{if(tot>1)$("shCount").textContent=(Math.round(g.scrollLeft/g.clientWidth)+1)+"/"+tot}}}catch(e){if(l.photoCount>1)$("shCount").textContent="More photos unavailable"}}}
+function closeSheet(){$("sheet").hidden=true;sheetL=null;document.body.style.overflow=""}
+function shareText(l){return "House to rent: "+l.title+", "+l.area+", "+l.rooms+" rooms, $"+l.rent+"/month. Chat with the landlord on Phomab: "+base()}
+
+function filtersActive(){return["fl-type","fl-rooms","fl-min","fl-max","fl-furn"].some(i=>$(i).value)||$("fl-sort").value!=="best"}
+function passFilters(l){const ty=$("fl-type").value,r=$("fl-rooms").value,mn=+$("fl-min").value,mx=+$("fl-max").value,fu=$("fl-furn").value;
+if(ty&&l.type!==ty)return false;if(r&&l.rooms!==+r)return false;if(mn&&l.rent<mn)return false;if(mx&&l.rent>mx)return false;if(fu==="yes"&&l.furnished!==true)return false;if(fu==="no"&&l.furnished===true)return false;return true}
+function sortRows(rows){const m=$("fl-sort").value,ts=l=>l.createdAt&&l.createdAt.toMillis?l.createdAt.toMillis():0;if(m==="new")rows.sort((a,b)=>ts(b.l)-ts(a.l));else if(m==="low")rows.sort((a,b)=>a.l.rent-b.l.rent);else if(m==="high")rows.sort((a,b)=>b.l.rent-a.l.rent);return rows}
+let lastRows=[],shown=12;
+function renderStrict(){const box=$("results");box.textContent="";lastRows.slice(0,shown).forEach(x=>box.appendChild(card(x.l,x.why)));
+if(lastRows.length>shown){const m=mk("button","btn alt","Show more ("+(lastRows.length-shown)+")");m.type="button";m.style.gridColumn="1/-1";m.onclick=()=>{shown+=12;renderStrict()};box.appendChild(m)}}
+async function run(){const q=$("q").value.trim();if(!q&&!filtersActive())return;$("found").hidden=false;$("mhint").textContent="Searching\u2026";
+try{await loadListings()}catch(e){$("found").hidden=false;$("mhint").textContent="Could not load listings: "+e.message;return}
+const pool=listings.filter(passFilters),o=understand(q,listings.map(l=>l.area)),any=o.areas.length||o.rooms||o.max||o.feats.length,r=any?rank(pool,o):{strict:pool.map(l=>({l,sc:0,why:""})),close:[]};sortRows(r.strict);
+if(user)addDoc(collection(db,"requests"),{uid:user.uid,q:q||"(filters)",rooms:o.rooms||null,budget:o.max||null,areas:o.areas,matches:r.strict.length,at:serverTimestamp()}).catch(()=>{});
+const u=$("understood");u.textContent="";u.appendChild(mk("span","meta","I understood:"));const cs=chipsFor(o);if(cs.length)cs.forEach(x=>u.appendChild(mk("span","chip on",x)));else u.appendChild(mk("span","meta","add rooms, area, budget"));
+$("mhint").textContent=r.strict.length?r.strict.length+" found":"No exact match";
+lastRows=r.strict;shown=12;renderStrict();if(!r.strict.length&&!r.close.length)$("results").appendChild(mk("div","empty","Nothing matches yet. Try fewer filters, another area or a higher budget."));
+$("closeWrap").hidden=!r.close.length;const cb=$("closeList");cb.textContent="";r.close.slice(0,8).forEach(x=>cb.appendChild(card(x.l,x.note,"Close match")));
+const pw=$("postWrap");pw.textContent="";if(any&&q)pw.appendChild(postReqBtn(q,o));
+$("found").scrollIntoView({behavior:"smooth"})}
+function postReqBtn(q,o){const b=mk("button","btn alt",t("postReq"));b.type="button";b.onclick=async()=>{if(!user){showAuth(t("login"));return}
+const num=prompt("Your WhatsApp number (required). Landlords will use it to contact you:",myNumber||"");if(!num)return;const nd=num.replace(/\D/g,"");if(nd.length<9||nd.length>13){alert("Please enter a valid WhatsApp number.");return}
+try{const ref=await addDoc(collection(db,"wanted"),{uid:user.uid,q:q.slice(0,200),rooms:o.rooms||null,budget:o.max||null,areas:o.areas,status:"open",waOn:true,createdAt:serverTimestamp()});await setDoc(doc(db,"wanted",ref.id,"contact","wa"),{phone:num.trim()});if(!myNumber){setDoc(doc(db,"contacts",user.uid),{phone:num.trim(),updatedAt:serverTimestamp()}).then(()=>{myNumber=num.trim()}).catch(()=>{})}b.disabled=true;b.textContent=t("posted");loadHome()}catch(e){alert("Could not post: "+e.message)}};return b}
+function wantSummary(w){return(w.rooms?w.rooms+" rooms":"A house")+(w.areas&&w.areas.length?" in "+w.areas.join(", "):"")+(w.budget?", up to $"+w.budget:"")}
+function wantedCard(w,own){const c=mk("article","want");c.append(mk("h3","",wantSummary(w)),mk("div","meta",(w.q||"").slice(0,140)+" \u00b7 "+ago(w.createdAt)));
+const b=own?mk("button","btn alt sm",t("closeReq")):mk("button","btn sm",t("contact"));b.type="button";b.style.marginTop="8px";
+if(own){const eb=mk("button","btn alt sm","Edit");eb.type="button";eb.style.cssText="margin:8px 8px 0 0";eb.onclick=async()=>{const nq=prompt("Edit your request:",w.q||"");if(!nq||!nq.trim())return;const o=understand(nq,listings.map(l=>l.area));try{await updateDoc(doc(db,"wanted",w.id),{q:nq.trim().slice(0,200),rooms:o.rooms||null,budget:o.max||null,areas:o.areas});loadHome()}catch(e){alert(e.message)}};c.appendChild(eb)}
+b.onclick=own?async()=>{try{await updateDoc(doc(db,"wanted",w.id),{status:"closed"});loadHome()}catch(e){alert(e.message)}}:()=>startWantedChat(w);if(!own&&w.waOn){const wb=mk("button","btn sm","Chat on WhatsApp");wb.type="button";wb.style.cssText="margin:8px 8px 0 0";b.className="btn alt sm";
+wb.onclick=async()=>{if(!user){showAuth("Sign in to chat on WhatsApp.");return}try{const sn=await getDoc(doc(db,"wanted",w.id,"contact","wa"));const p=sn.exists()?sn.data().phone:null;if(!p){alert("No number shared.");return}window.open("https://wa.me/"+waNum(p)+"?text="+encodeURIComponent("Hi, I saw your request on Phomab: "+wantSummary(w)+". I may have a house for you."),"_blank")}catch(e){alert("Could not open WhatsApp: "+e.message)}};c.append(wb)}
+c.append(b);return c}
+let homeLoadPromise=null;
+async function loadHome(){
+ if(homeLoadPromise)return homeLoadPromise;
+ homeLoadPromise=(async()=>{
+  const listingTask=loadListings().then(()=>{
+   const box=$("latestList");box.textContent="";
+   const arr=listings.slice(0,8);
+   if(!arr.length)box.appendChild(mk("div","empty","No vacancies yet."));
+   arr.forEach(l=>box.appendChild(card(l)));
+  }).catch(()=>{});
+  const wantedTask=getDocs(query(collection(db,"wanted"),orderBy("createdAt","desc"),limit(30))).then(s=>{
+   const all=s.docs.map(d=>({id:d.id,...d.data()})).filter(w=>w.status==="open"&&w.q);
+   const box=$("wantedList");box.textContent="";$("s5").hidden=false;
+   const pub=all.filter(w=>!user||w.uid!==user.uid).slice(0,8);
+   if(!pub.length)box.appendChild(mk("div","empty","No tenant requests yet."));
+   pub.forEach(w=>box.appendChild(wantedCard(w,false)));
+   const own=user?all.filter(w=>w.uid===user.uid):[];
+   $("s6").hidden=!own.length;const mb=$("myReqList");mb.textContent="";
+   own.forEach(w=>mb.appendChild(wantedCard(w,true)));
+  }).catch(()=>{});
+  await Promise.all([listingTask,wantedTask]);
+ })();
+ try{await homeLoadPromise}finally{homeLoadPromise=null}
+}
+
+/* ---------- list a vacancy ---------- */
+function renderPrevs(){const p=$("prevs");p.textContent="";
+pend.forEach((x,i)=>{const d=mk("div"),im=mk("img");im.src=x.thumb||x.full;im.alt="";const b=mk("button","","\u00d7");b.type="button";b.onclick=()=>{if(x.id)removedIds.push(x.id);pend.splice(i,1);renderPrevs()};d.append(im,b);if(i===0)d.appendChild(mk("span","cvr","Cover"));p.appendChild(d)});
+$("addPhotos").textContent="Add photos ("+pend.length+"/10)";$("addPhotos").disabled=pend.length>=10}
+async function addPhotos(files){$("saved").textContent="Preparing photos\u2026";
+for(const f of files.slice(0,10-pend.length)){try{let full=await shrink(f,900,.72);if(full.length>330000)full=await shrink(f,700,.6);const thumb=await shrink(f,360,.6);pend.push({full,thumb})}catch(e){}}
+renderPrevs();$("saved").textContent=""}
+function resetForm(){["f-title","f-area","f-rent","f-desc","f-wa"].forEach(i=>$(i).value="");$("f-wa").value=myNumber||"";$("f-rooms").value="3";$("f-type").value="House";$("f-baths").value="";$("f-furn").value="no";$("f-consent").checked=false;pend=[];removedIds=[];editId=null;$("listH").textContent=t("listTitle");$("save").textContent=t("save");$("cancelEdit").hidden=true;renderPrevs()}
+async function editListing(l){tab("list");resetForm();editId=l.id;removedIds=[];
+$("listH").textContent="Edit vacancy";$("save").textContent="Save changes";$("cancelEdit").hidden=false;
+$("f-title").value=l.title||"";$("f-area").value=l.area||"";$("f-rooms").value=String(l.rooms||3);$("f-rent").value=l.rent||"";$("f-desc").value=l.desc||"";$("f-type").value=l.type||"House";$("f-baths").value=l.baths?String(l.baths):"";$("f-furn").value=l.furnished?"yes":"no";$("f-consent").checked=!!l.consentAt;
+getDoc(doc(db,"listings",l.id,"contact","wa")).then(x=>{if(x.exists())$("f-wa").value=x.data().phone||""}).catch(()=>{});
+$("saved").textContent="Loading photos\u2026";
+try{if(l.photoCount>0){const s=await getDocs(query(collection(db,"listings",l.id,"photos"),orderBy("i")));s.docs.forEach(d=>pend.push({id:d.id,full:d.data().data,thumb:null}))}
+else if(l.photo)pend.push({full:l.photo,thumb:l.thumb||l.photo})}catch(e){}
+$("saved").textContent="";renderPrevs();window.scrollTo(0,0)}
+async function save(){if(!user){showAuth(t("login"));return}
+const title=$("f-title").value.trim(),area=$("f-area").value.trim(),rooms=+$("f-rooms").value,rent=+$("f-rent").value,desc=$("f-desc").value.trim();
+const waOn=true,waNumber=$("f-wa").value.trim(),wd=waNumber.replace(/\D/g,"");
+if(!title||!area||!rooms||!rent){$("saved").textContent="Fill in the title, area, rooms and rent.";return}
+if(wd.length<9||wd.length>13){$("saved").textContent="Enter your WhatsApp number. It is required.";return}
+if(!$("f-consent").checked){$("saved").textContent="Please tick the box to agree that your number is shown.";return}
+$("save").disabled=true;$("saved").textContent="Saving\u2026";
+try{let thumb=null;if(pend[0])thumb=pend[0].thumb||await thumbFromData(pend[0].full);
+const data={title,area,rooms,rent,desc,thumb,photoCount:pend.length,waOn,type:$("f-type").value,baths:+$("f-baths").value||null,furnished:$("f-furn").value==="yes",consentAt:serverTimestamp()};let id=editId,failed=false;
+if(editId){data.photo=null;await updateDoc(doc(db,"listings",editId),data)}
+else{const ref=await addDoc(collection(db,"listings"),{...data,owner:user.uid,createdAt:serverTimestamp()});id=ref.id}
+try{await setDoc(doc(db,"listings",id,"contact","wa"),{phone:waNumber})}catch(e){failed=true}
+if(!myNumber){setDoc(doc(db,"contacts",user.uid),{phone:waNumber,updatedAt:serverTimestamp()}).then(()=>{myNumber=waNumber}).catch(()=>{})}
+for(const rid of removedIds){try{await deleteDoc(doc(db,"listings",id,"photos",rid))}catch(e){failed=true}}
+for(let i=0;i<pend.length;i++){const p=pend[i];try{if(p.id)await updateDoc(doc(db,"listings",id,"photos",p.id),{i});else await addDoc(collection(db,"listings",id,"photos"),{i,data:p.full})}catch(e){failed=true}}
+const was=!!editId;resetForm();
+$("saved").textContent=failed?"Saved, but some photos could not be stored. The Firebase rules need updating.":(was?"Changes saved.":"Saved. Tenants searching "+area+" can now see it.");mine()}catch(e){$("saved").textContent="Error: "+e.message}
+$("save").disabled=false}
+async function mine(){const box=$("mine");box.textContent="";if(!user){box.appendChild(mk("div","empty",t("login")));return}
+const s=await getDocs(query(collection(db,"listings"),where("owner","==",user.uid)));
+if(s.empty){box.appendChild(mk("div","empty","No vacancies yet."));return}
+s.docs.forEach(d=>{const l={id:d.id,...d.data()},taken=l.status==="taken",row=mk("div","mine"),im=l.thumb||l.photo;
+if(im){const i=mk("img");i.src=im;i.alt="";if(taken)i.style.opacity=".45";row.appendChild(i)}else row.appendChild(mk("div","nopic"));
+const mid=mk("div","cmid");mid.append(mk("h3","",l.title+(taken?" ("+t("takenWord")+")":"")),mk("div","meta",l.area+" \u00b7 "+l.rooms+" rooms \u00b7 $"+l.rent+"/mo"+(taken?" \u00b7 hidden from searches":"")+(l.waOn?"":" \u00b7 Add your WhatsApp number (tap Edit)")));
+const acts=mk("div","acts"),tg=mk("button",taken?"btn alt sm":"btn sm",taken?t("backAvail"):t("markTaken"));tg.type="button";
+tg.onclick=async()=>{try{await updateDoc(doc(db,"listings",l.id),{status:taken?"available":"taken"});mine()}catch(e){alert(e.message)}};
+const del=mk("button","btn alt sm","Remove");del.type="button";
+del.onclick=async()=>{if(!confirm("Remove this vacancy completely?"))return;try{const ps=await getDocs(collection(db,"listings",l.id,"photos"));for(const p of ps.docs)await deleteDoc(p.ref)}catch(e){}try{await deleteDoc(doc(db,"listings",l.id,"contact","wa"))}catch(e){}await deleteDoc(doc(db,"listings",l.id));mine()};
+const sh=mk("button","btn alt sm","Share");sh.type="button";sh.onclick=()=>wa(shareText(l));
+const ed=mk("button","btn alt sm","Edit");ed.type="button";ed.onclick=()=>editListing(l);acts.append(ed,tg,sh,del);mid.appendChild(acts);row.appendChild(mid);box.appendChild(row)})}
+
+/* ---------- chats ---------- */
+function markSeen(id,c){lastSeen[id]=ms(c);try{localStorage.setItem("phb_seen",JSON.stringify(lastSeen))}catch(e){}}
+function viewing(id){return curChat===id&&!$("chatScreen").hidden&&!document.hidden}
+function isUnread(d){const c=d.data();if(!user||!c.lastFrom||c.lastFrom===user.uid)return false;if(viewing(d.id))return false;return ms(c)>(lastSeen[d.id]||0)}
+function setBadge(n){unreadN=n;const d=$("chatDot");d.textContent=n;d.hidden=!n;document.title=(n?"("+n+") ":"")+"Phomab: find a house to rent in Bulawayo"}
+function renderChats(){const box=$("chatList");box.textContent="";let n=0;
+if(!lastDocs.length){box.appendChild(mk("div","empty","No chats yet. Open a house and tap Chat on Phomab."));setBadge(0);return}
+lastDocs.slice().sort((a,b)=>ms(b.data())-ms(a.data())).forEach(d=>{const c=d.data(),u=isUnread(d);if(u)n++;
+const row=mk("button","crow"+(u?" unread":""));row.type="button";
+const av=mk("div","av",String(c.title||"?").replace(/^Looking for:\s*/,"").slice(0,1).toUpperCase()),mid=mk("div","cmid");
+mid.append(mk("div","ct",c.title+(c.area?" \u00b7 "+c.area:"")),mk("div","cl",(c.lastText||(c.agreed?"Deal agreed at $"+c.agreed:"Say hello"))));
+const rt=mk("div","cr",ago(c.updatedAt));if(u)rt.appendChild(mk("span","pill","new"));
+row.append(av,mid,rt);row.onclick=()=>openChat(d.id,c.title+(c.area?", "+c.area:""));box.appendChild(row)});
+setBadge(n)}
+function notify(c){try{navigator.vibrate&&navigator.vibrate(200)}catch(e){}
+if(!("Notification" in window)||Notification.permission!=="granted")return;
+const title="New message on Phomab",opts={body:(c.lastText||"New message")+" \u00b7 "+c.title,tag:"phomab"};
+if(swReg){navigator.serviceWorker.ready.then(r=>r.showNotification(title,opts)).catch(()=>{})}else{try{new Notification(title,opts)}catch(e){}}}
+function notifLabel(){const b=$("notifBtn");if(!b)return;if(!("Notification" in window)){b.hidden=true;return}const on=Notification.permission==="granted";b.textContent=on?t("notifOn"):t("notif");b.disabled=on||Notification.permission==="denied"}
+function watchChats(){if(unsubChats)unsubChats();if(!user)return;firstSnap=true;
+unsubChats=onSnapshot(query(collection(db,"chats"),where("members","array-contains",user.uid)),s=>{lastDocs=s.docs;renderChats();
+if(!firstSnap)s.docChanges().forEach(ch=>{if(ch.type!=="modified")return;const c=ch.doc.data();if(c.lastFrom&&c.lastFrom!==user.uid&&!viewing(ch.doc.id))notify(c)});
+firstSnap=false})}
+async function startChat(l){if(!user){closeSheet();showAuth(t("login"));return}
+if(l.owner===user.uid){alert("This is your own listing.");return}
+const id=l.id+"_"+user.uid,ref=doc(db,"chats",id);
+try{const s=await getDoc(ref);if(!s.exists())await setDoc(ref,{members:[user.uid,l.owner],tenant:user.uid,listingId:l.id,title:l.title,area:l.area,rent:l.rent,agreed:null,updatedAt:serverTimestamp()});
+closeSheet();tab("chats");openChat(id,l.title+", "+l.area)}catch(e){alert("Chat error: "+e.message)}}
+async function startWantedChat(w){if(!user){showAuth(t("login"));return}
+if(w.uid===user.uid){alert("This is your own request.");return}
+const id="w"+w.id+"-"+user.uid,ref=doc(db,"chats",id),ttl="Looking for: "+wantSummary(w);
+try{const s=await getDoc(ref);if(!s.exists())await setDoc(ref,{members:[user.uid,w.uid],tenant:w.uid,wantedId:w.id,listingId:null,title:ttl,area:(w.areas&&w.areas[0])||"",rent:w.budget||0,agreed:null,updatedAt:serverTimestamp()});
+tab("chats");openChat(id,ttl)}catch(e){alert("Chat error: "+e.message)}}
+function openChat(id,title){curChat=id;$("chatScreen").hidden=false;document.body.style.overflow="hidden";$("chat-h").textContent=title;$("deal").hidden=true;$("tools").hidden=true;$("offerRow").hidden=true;$("takenBtn").hidden=true;$("msgs").textContent="";
+if(unsubMsgs)unsubMsgs();if(unsubChat)unsubChat();
+unsubChat=onSnapshot(doc(db,"chats",id),d=>{if(!d.exists())return;const c=d.data();curMembers=c.members||[];if(!document.hidden)markSeen(id,c);renderChats();
+const a=c.agreed;$("deal").hidden=!a;if(a)$("deal").textContent="Deal agreed at $"+a+"/month. Next: view the house in person and sign the agreement.";
+curListing=c.listingId||null;const tu=c.tenant||id.split("_")[1];$("takenBtn").hidden=!(a&&user&&curListing&&tu!==user.uid)});
+unsubMsgs=onSnapshot(query(collection(db,"chats",id,"messages"),orderBy("at","desc"),limit(50)),s=>{const box=$("msgs");box.textContent="";
+s.docs.slice().reverse().forEach(d=>{const m=d.data(),mine=m.from===user.uid,el=mk("div","m "+(mine?"t":"l"));
+if(m.offer){el.appendChild(mk("div","o","Offer: $"+m.offer+"/month"));if(!mine){const b=mk("button","","Accept $"+m.offer);b.type="button";b.onclick=()=>updateDoc(doc(db,"chats",id),{agreed:m.offer,updatedAt:serverTimestamp(),lastFrom:user.uid,lastText:"Offer accepted: $"+m.offer}).catch(e=>alert(e.message));el.appendChild(b)}}
+if(m.image){const im=mk("img");im.src=m.image;im.alt="Photo";im.onclick=()=>zoom(m.image);el.appendChild(im)}
+if(m.audio){const a=document.createElement("audio");a.controls=true;a.preload="none";a.src=m.audio;el.appendChild(a);el.appendChild(mk("div","meta","Voice note"+(m.dur?", "+m.dur+"s":"")))}
+if(m.text)el.appendChild(mk("div","",m.text));
+el.appendChild(mk("div","tm",fmtTime(m.at)));box.appendChild(el)});box.scrollTop=box.scrollHeight})}
+function closeChat(){if(rec)stopRec(false);curChat=null;curMembers=[];if(unsubMsgs){unsubMsgs();unsubMsgs=null}if(unsubChat){unsubChat();unsubChat=null}$("chatScreen").hidden=true;document.body.style.overflow="";renderChats()}
+function maybeAlert(){const to=(curMembers||[]).find(m=>m!==user.uid);if(!to||!curChat)return;const k="phb_al_"+curChat;let last=0;try{last=+localStorage.getItem(k)||0}catch(e){}
+if(Date.now()-last<20*60*1000)return;try{localStorage.setItem(k,String(Date.now()))}catch(e){}
+addDoc(collection(db,"alerts"),{chatId:curChat,to,from:user.uid,title:($("chat-h").textContent||"").slice(0,120),status:"pending",createdAt:serverTimestamp()}).catch(()=>{})}
+async function startVideoCall(){if(!curChat||!user){alert("Open a PHOMAB chat before starting a video call.");return}const btn=$("videoCallBtn");if(btn)btn.disabled=true;try{const bytes=new Uint8Array(18);if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(bytes);else for(let i=0;i<bytes.length;i++)bytes[i]=Math.floor(Math.random()*256);const token=Array.from(bytes,x=>x.toString(16).padStart(2,"0")).join("");const room="PHOMAB-"+token;const url="https://meet.jit.si/"+room;const win=window.open(url,"_blank","noopener,noreferrer");await post({text:"I started a PHOMAB video call. Join me here: "+url});if(!win)alert("The call link was sent in this chat, but your browser blocked the new tab. Open the link in the chat to join.");}catch(e){alert("Could not start the video call. Please try again.")}finally{if(btn)btn.disabled=false}}
+async function post(data){if(!curChat||!user)return;try{await addDoc(collection(db,"chats",curChat,"messages"),{from:user.uid,at:serverTimestamp(),...data});maybeAlert();
+updateDoc(doc(db,"chats",curChat),{updatedAt:serverTimestamp(),lastFrom:user.uid,lastText:data.text?data.text.slice(0,80):data.offer?"Offer: $"+data.offer:data.image?"Photo":data.audio?"Voice note":"New message"}).catch(()=>{})}catch(e){alert("Could not send: "+e.message)}}
+async function sendMsg(){const v=$("msg").value.trim();if(!v)return;$("msg").value="";post({text:v})}
+async function sendOffer(){const v=+$("offer").value;if(!v)return;$("offer").value="";$("offerRow").hidden=true;post({offer:v})}
+function stopRec(send){if(!rec)return;rec._send=send;try{rec.stop()}catch(e){}}
+async function toggleRec(){if(rec){stopRec(true);return}
+if(!curChat||!user)return;
+if(!navigator.mediaDevices||!window.MediaRecorder){alert("Voice notes are not supported on this browser.");return}
+try{const st=await navigator.mediaDevices.getUserMedia({audio:true});
+const mt=["audio/webm;codecs=opus","audio/webm","audio/mp4"].find(x=>MediaRecorder.isTypeSupported(x))||"";
+rec=new MediaRecorder(st,mt?{mimeType:mt,audioBitsPerSecond:24000}:{audioBitsPerSecond:24000});recChunks=[];recStart=Date.now();rec._send=true;
+rec.ondataavailable=e=>{if(e.data.size)recChunks.push(e.data)};
+rec.onstop=async()=>{st.getTracks().forEach(x=>x.stop());clearTimeout(recTimer);$("mic").textContent="Voice note";$("recBar").hidden=true;const r=rec;rec=null;if(!r._send)return;
+const blob=new Blob(recChunks,{type:r.mimeType||"audio/webm"});if(blob.size<800)return;
+const url=await new Promise(res=>{const f=new FileReader();f.onload=()=>res(f.result);f.readAsDataURL(blob)});
+if(url.length>700000){alert("Voice note too long. Keep it under 45 seconds.");return}
+post({audio:url,dur:Math.round((Date.now()-recStart)/1000)})};
+rec.start();$("mic").textContent="Stop and send";$("recBar").hidden=false;recTimer=setTimeout(()=>stopRec(true),45000)
+}catch(e){alert("Could not use the microphone. Allow microphone access and try again.")}}
+
+/* ---------- account, number, desk ---------- */
+function loadMyNumber(){if(!user)return;getDoc(doc(db,"contacts",user.uid)).then(x=>{if(x.exists()&&x.data().phone){$("myWa").value=x.data().phone;myNumber=x.data().phone}}).catch(()=>{})}
+async function saveMyNumber(){if(!user){showAuth(t("login"));return}const p=$("myWa").value.trim(),n=p.replace(/\D/g,"");
+if(p&&(n.length<9||n.length>13)){$("waMsg").textContent="Please enter a valid number.";return}
+try{if(p)await setDoc(doc(db,"contacts",user.uid),{phone:p,updatedAt:serverTimestamp()});else await deleteDoc(doc(db,"contacts",user.uid));$("waMsg").textContent=p?"Saved.":"Number removed."}catch(e){$("waMsg").textContent=e.code==="permission-denied"?"Not allowed yet. The Firebase rules need updating.":"Error: "+e.message}}
+async function authGo(up){const e=$("em").value.trim(),p=$("pw").value;$("amsg").textContent="...";
+try{up?await createUserWithEmailAndPassword(auth,e,p):await signInWithEmailAndPassword(auth,e,p);$("amsg").textContent="";$("pw").value="";tab("find")}catch(x){$("amsg").textContent=x.code==="auth/invalid-credential"?"Wrong email or password.":x.code==="auth/email-already-in-use"?"Email already in use. Try Sign in.":x.code==="auth/weak-password"?"Password needs 6+ characters.":x.message}}
+async function loadDesk(){const box=$("deskList");box.textContent="Loading\u2026";
+try{const s=await getDocs(query(collection(db,"alerts"),where("status","==","pending"),limit(60)));
+const groups={};s.docs.forEach(d=>{const a={id:d.id,...d.data()},k=a.chatId+"|"+a.to;(groups[k]=groups[k]||[]).push(a)});
+box.textContent="";const keys=Object.keys(groups);if(!keys.length){box.appendChild(mk("div","empty","No alerts waiting."));return}
+for(const k of keys){const g=groups[k],a=g[g.length-1];let phone=null;
+try{const c=await getDoc(doc(db,"contacts",a.to));if(c.exists())phone=c.data().phone}catch(e){}
+const cardEl=mk("article","want");cardEl.append(mk("h3","",a.title||"New message"),mk("div","meta",(phone?"To: "+phone:"No number saved")+" \u00b7 "+g.length+" waiting \u00b7 "+ago(a.createdAt)));
+const row=mk("div","acts");const mark=async st=>{for(const x of g)await updateDoc(doc(db,"alerts",x.id),{status:st});cardEl.remove()};
+if(phone){const b=mk("button","btn sm","Send on WhatsApp");b.type="button";b.onclick=()=>{window.open("https://wa.me/"+waNum(phone)+"?text="+encodeURIComponent("Hello from Phomab. You have a new message about: "+(a.title||"your listing")+". Please open Phomab to reply: "+base()),"_blank");mark("sent").catch(e=>alert(e.message))};row.appendChild(b)}
+const sk=mk("button","btn alt sm","Skip");sk.type="button";sk.onclick=()=>mark("skipped").catch(e=>alert(e.message));row.appendChild(sk);cardEl.appendChild(row);box.appendChild(cardEl)}
+}catch(e){box.textContent="Not available for this account. ("+(e.code||e.message)+")"}}
+async function loadReports(){const box=$("reportList");box.textContent="";
+try{const s=await getDocs(query(collection(db,"reports"),where("status","==","open"),limit(40)));if(s.empty){box.appendChild(mk("div","empty","No open reports."));return}
+s.docs.forEach(d=>{const r=d.data(),c=mk("article","want");c.append(mk("h3","",r.title||"Listing"),mk("div","meta",r.reason+(r.note?": "+r.note:"")+" \u00b7 "+ago(r.createdAt)));const row=mk("div","acts");
+const hide=mk("button","btn sm","Hide listing");hide.type="button";hide.onclick=async()=>{try{await updateDoc(doc(db,"listings",r.listingId),{status:"hidden"});await updateDoc(d.ref,{status:"actioned"});c.remove()}catch(e){alert(e.message)}};
+const dis=mk("button","btn alt sm","Dismiss");dis.type="button";dis.onclick=async()=>{try{await updateDoc(d.ref,{status:"dismissed"});c.remove()}catch(e){alert(e.message)}};
+row.append(hide,dis);c.appendChild(row);box.appendChild(c)})}catch(e){box.textContent="Not available for this account."}}
+function showDesk(){tab("desk");loadDesk();loadReports()}
+
+
+/* ---------- Phomab Help (built-in guide) ---------- */
+const KB=[
+{k:["hello","hi ","hey","sawubona","mhoro","hie","good morning","good afternoon"],a:"Hi! I\u2019m Phomab Help.\nAsk me how to use Phomab, or tell me the house you need, like 2 rooms in Nketha under $150."},
+{k:["thank","ngiyabonga","ndatenda","cheers"],a:"You\u2019re welcome!"},
+{k:["find a house","find house","search","look for","looking for","need a house","rent a house","get a house","funa indlu","tsvaga imba"],a:"Ask: type what you need, including rooms, area and budget, on the Find tab.\nMatch: open a suitable listing to see details and photos.\nAgree: use the landlord phone number, Chat on WhatsApp or Call Landlord options shown on the listing when available.",go:[["Go to Find",()=>tab("find")]]},
+{k:["list","post a house","landlord","vacancy","vacancies","advertise","rent out","add a house","add house","add my house","beka indlu","isa imba"],a:"To list a house:\n1. Sign in or create an account.\n2. Open the List tab.\n3. Fill in the title, area, rooms, rent and your WhatsApp number.\n4. Add photos (up to 10).\n5. Tap Save vacancy.",go:[["Open List",()=>tab("list")]]},
+{k:["photo","photos","picture","pictures","image","images","gallery"],a:"Photos:\n\u2022 On the List tab, tap + Photos and pick up to 10 pictures at once.\n\u2022 The first one is the cover.\n\u2022 Tap \u00d7 on a photo to remove it.\n\u2022 Tenants swipe through all photos when they open your house.",go:[["Open List",()=>tab("list")]]},
+{k:["chat","message","talk to","contact","reach","write to"],a:"To contact a landlord, open a property listing and look for the landlord contact section. Use Chat on WhatsApp or Call Landlord when the landlord has shared contact details. You can also use Phomab Chats where available.",go:[["Open Chats",()=>tab("chats")]]},
+{k:["offer","negotiate","agree","deal","accept","price"],a:"Offers:\n1. In a chat tap + then Make offer.\n2. Type the rent you suggest and send.\n3. The other person taps Accept to agree.",go:[["Open Chats",()=>tab("chats")]]},
+{k:["voice","record","audio"],a:"Voice notes: in a chat tap +, then Voice note. Speak, then tap it again to send. Notes stop after 45 seconds."},
+{k:["taken","rented","no longer","remove","delete","unlist","hide"],a:"When a house is taken:\n1. Open the List tab.\n2. Tap Mark as taken on that house.\nIt stops showing in searches. You can bring it back with Make available again.",go:[["Open List",()=>tab("list")]]},
+{k:["sign in","login","log in","register","sign up","account","password","create account","email"],a:"Tap the Account tab, enter your email and a password (6+ characters), then tap Create account or Sign in. You only need an account to chat, list or post a request.",go:[["Open Account",()=>tab("account")]]},
+{k:["free","cost","pay","charge","fee","money","price of phomab"],a:"Phomab is free to use. Never pay a deposit or rent before you have viewed the house in person."},
+{k:["safe","scam","trust","fraud","verify","cheat","steal"],a:"Stay safe:\n\u2022 View the house in person first.\n\u2022 Never pay before you see it.\n\u2022 Keep chats on Phomab until you are sure.\n\u2022 Meet in daylight, and bring someone with you."},
+{k:["report","scam listing","fake listing","wrong information","not available anymore"],a:"To report a listing: open it, tap Report listing, choose a reason and send. Phomab reviews every report and can hide a listing."},
+{k:["filter","sort","cheapest","furnished","price range","bedroom","minimum","maximum"],a:"Use Filters under the search box: type, rooms, price range, furnished and sorting. Tap Clear filters to start again."},
+{k:["chat on whatsapp","contact on whatsapp","landlord number","phone number","call the landlord","landlord whatsapp"],a:"Contacting a landlord:\n\u2022 Open a house. You will see the landlord\u2019s number with Chat on WhatsApp and Call landlord buttons. Sign in to see the number.\n\u2022 Landlords must add their WhatsApp number when they list a house.\n\u2022 Tenants add theirs when they post a request, so landlords can reach them."},
+{k:["alert","notification","notify","whatsapp","not on the site","offline","buzz"],a:"Alerts:\n\u2022 Chats shows a number when you have new messages.\n\u2022 In Account, turn on message alerts.\n\u2022 Save your WhatsApp number there too. Phomab can alert you on WhatsApp. Your number stays private.",go:[["Open Account",()=>tab("account")]]},
+{k:["tenant request","post my request","find a tenant","tenants","looking for a tenant","wanted"],a:"Tenants can post a request after a search, so landlords can contact them. Landlords see the requests on the Find tab and tap Contact tenant."},
+{k:["language","shona","ndebele","english","ulimi","mutauro"],a:"Change the language in Account. Some labels are available in Ndebele and Shona.",go:[["Open Account",()=>tab("account")]]},
+{k:["data","slow","install","home screen","app","load"],a:"Phomab uses little data: photos are compressed and the page is cached. To keep it handy, open your browser menu and choose Add to Home screen."}
+];
+function helpSay(txt,cls,acts){const box=$("hmsgs"),el=mk("div","m "+cls);String(txt).split("\n").forEach(l=>el.appendChild(mk("div","",l)));
+if(acts&&acts.length){const row=mk("div","acts");acts.forEach(a=>{const b=mk("button","",a[0]);b.type="button";b.onclick=()=>{closeHelp();a[1]()};row.appendChild(b)});el.appendChild(row)}
+box.appendChild(el);box.scrollTop=box.scrollHeight}
+async function ask(q){
+ q=String(q||"").trim();if(!q)return;helpSay(q,"t");
+ try{await loadListings()}catch(e){}
+ const raw=q.toLowerCase(),s=" "+raw+" ";
+ const howq=/^\s*(how|what|where|why|can i|can you|is it|is phomab|do i|does|who|when|help|are there|show me|tell me)/.test(raw);
+ const o=understand(q,[...new Set((listings||[]).map(l=>l.area).filter(Boolean))]);
+ if(/(how many|number of|any|available|vacancies|listings|houses are|rooms are|show.*(house|listing)|what.*available)/.test(raw)){
+  let found=(listings||[]).filter(l=>!["taken","unavailable","hidden"].includes(String(l.status||"").toLowerCase()));
+  if(o.areas.length)found=found.filter(l=>o.areas.some(a=>String(l.area||"").toLowerCase()===a.toLowerCase()));
+  if(o.rooms)found=found.filter(l=>Number(l.rooms)===o.rooms);
+  if(o.max)found=found.filter(l=>Number(l.rent)<=o.max);
+  if(o.min)found=found.filter(l=>Number(l.rent)>=o.min);
+  if(o.feats.length)found=found.filter(l=>o.feats.every(f=>{const txt=(String(l.title||"")+" "+String(l.desc||"")).toLowerCase();return FEAT[f].some(w=>txt.includes(w))}));
+  if(found.length){
+   const sample=found.slice(0,4).map(l=>"• "+(l.title||"Rental")+" — "+(l.area||"Area not stated")+", "+(l.rooms||"?")+" room(s), "+(l.rent?"$"+l.rent:"rent not stated")).join("\n");
+   helpSay("I checked the listings currently loaded on PHOMAB. I found "+found.length+" matching listing(s):\n"+sample+(found.length>4?"\nOpen Find to see more.":"")+"\nConfirm availability and details with the landlord before paying.","l",[["Open matching listings",()=>{closeHelp();tab("find");$("q").value=q;run()}]]);return;
+  }
+  helpSay("I couldn't find a matching listing in the data currently loaded. Try widening the area or budget, or open Find to check the latest results.","l",[["Search PHOMAB",()=>{closeHelp();tab("find");$("q").value=q;run()}]]);return;
+ }
+ if(!howq&&(o.rooms||o.areas.length||o.max||o.min||o.feats.length)){helpSay("I understood your request as: "+chipsFor(o).join(", ")+". I'll use it to search PHOMAB listings.","l",[["Find matches",()=>{closeHelp();tab("find");$("q").value=q;run()}]]);return}
+ const extras=[
+  {k:["phomab mean","meaning of phomab","stands for","full form","what is phomab"],a:"PHOMAB stands for Pristine Homes Offering More Affordable Blending. Describe the home you need, match with available listings, then contact the landlord to agree on details."},
+  {k:["no listings","nothing showing","empty","no houses"],a:"If no homes appear, try a nearby suburb, widen your budget, or remove some filters. Listings depend on landlords adding genuine vacancies, so confirm availability directly."},
+  {k:["ai","artificial intelligence","smart assistant"],a:"I can interpret rental needs, guide you around PHOMAB, and answer questions using listing information loaded from the site."},
+  {k:["deposit","pay first","send money","payment before viewing"],a:"Do not send a deposit before viewing the property and checking that the person is authorised to rent it out."}
+ ];
+ let best=null,bs=0;[...extras,...KB].forEach(e=>{let sc=0;e.k.forEach(w=>{if(s.includes(w))sc+=w.length>6?3:w.length>3?2:1});if(sc>bs){bs=sc;best=e}});
+ if(best&&bs>0){helpSay(best.a,"l",best.go);return}
+ helpSay("I haven't found a confident answer to that yet. I can help you search rentals, understand matching, list a vacancy, contact landlords, stay safe, or manage your account. For current availability, check Find and confirm with the landlord.","l",[["Find a house",()=>{closeHelp();tab("find")}],["List a vacancy",()=>{closeHelp();tab("list")}],["Account help",()=>{closeHelp();tab("account")}]]);
+}
+function openHelp(){$("help").hidden=false;document.body.style.overflow="hidden";if(!$("hmsgs").children.length)helpSay("Hi! I\u2019m Phomab Help.\nAsk me how to use Phomab, or tell me the house you need.","l")}
+function closeHelp(){$("help").hidden=true;document.body.style.overflow=""}
+
+/* ---------- start ---------- */
+onAuthStateChanged(auth,u=>{user=u;const welcome=$("v-welcome"),findView=$("v-find"),tabbar=document.querySelector(".tabbar"),topAuth=$("topAuth"),meBox=$("meBox"),meEmail=$("meEmail");if(welcome)welcome.hidden=!!u;if(findView)findView.hidden=!u;if(tabbar)tabbar.hidden=!u;if(topAuth)topAuth.hidden=!!u;if(meBox)meBox.hidden=!u;if(meEmail)meEmail.textContent=u?u.email:"";apply();
+if(!u){unreadN=0;lastDocs=[];setBadge(0);if(unsubChats)unsubChats();closeChat();const chatList=$("chatList");if(chatList)chatList.textContent="";if(location.hash==="#desk")showAuth("Sign in to open Phomab desk.")}
+else{watchChats();loadMyNumber();if(location.hash==="#desk")showDesk()}
+loadHome()});
+$("lang").onchange=e=>{lang=e.target.value;apply()};
+$("topAuth").onclick=()=>user?tab("account"):showAuth("");
+const signOutBtn=$("signOutBtn");if(signOutBtn)signOutBtn.onclick=()=>signOut(auth);
+$("doIn").onclick=()=>authGo(false);$("doUp").onclick=()=>authGo(true);
+["find","browse","list","chats","account"].forEach(n=>$("t-"+n).onclick=()=>tab(n));
+$("fl-apply").onclick=run;$("fl-clear").onclick=()=>{["fl-type","fl-rooms","fl-min","fl-max","fl-furn"].forEach(i=>$(i).value="");$("fl-sort").value="best";$("found").hidden=true};
+$("go").onclick=run;$("q").addEventListener("keydown",e=>{if(e.key==="Enter")run()});
+$("browse-search").onclick=()=>{const q=$("browse-q").value.trim().toLowerCase();const box=$("latestList");box.textContent="";const rows=(listings||[]).filter(l=>!["taken","unavailable"].includes(String(l.status||"").toLowerCase())&&(!q||[l.title,l.area,l.type].some(v=>String(v||"").toLowerCase().includes(q))));$("browse-count").textContent=rows.length+" available listing(s)";rows.forEach(l=>box.appendChild(card(l)));if(!rows.length)box.appendChild(mk("div","empty","No listings match that search yet."))};
+$("browse-q").addEventListener("keydown",e=>{if(e.key==="Enter")$("browse-search").click()});
+$("save").onclick=save;$("addPhotos").onclick=()=>$("f-photos").click();$("cancelEdit").onclick=resetForm;$("cam").onclick=()=>$("picIn").click();$("f-photos").onchange=e=>{const f=[...e.target.files];e.target.value="";addPhotos(f)};
+async function getPhone(){if(!sheetL)return null;if(!user){closeSheet();showAuth("Sign in to contact the landlord.");return null}
+if(curPhone)return curPhone;try{const sn=await getDoc(doc(db,"listings",sheetL.id,"contact","wa"));curPhone=sn.exists()?sn.data().phone:null}catch(e){alert("Could not load the number: "+e.message);return null}
+if(!curPhone)alert("This landlord has not shared a number.");return curPhone}
+$("shWa").onclick=async()=>{const p=await getPhone();if(!p)return;const d=validNum(p);if(!d){alert("This number looks invalid. Try calling or chat in Phomab.");return}
+window.open("https://wa.me/"+d+"?text="+encodeURIComponent("Hello, I found your property on PHOMAB. Is it still available?\n"+sheetL.title+" ("+sheetL.area+", $"+sheetL.rent+"/month)"),"_blank")};
 $("shCall").onclick=async()=>{const p=await getPhone();if(!p)return;const d=validNum(p);if(!d){alert("This number looks invalid. Try chat in Phomab.");return}location.href="tel:+"+d};
 $("shReport").onclick=()=>{if(!user){closeSheet();showAuth("Sign in to report a listing.");return}$("reportBox").hidden=!$("reportBox").hidden};
 $("rp-cancel").onclick=()=>{$("reportBox").hidden=true};
