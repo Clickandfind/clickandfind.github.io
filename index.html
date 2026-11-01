@@ -241,7 +241,9 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #
 #v-find #found{margin-top:20px}
 #v-welcome[hidden],#v-find[hidden]{display:none!important}
 @media(max-width:520px){#v-welcome{padding:18px 0 30px}.welcome-logo{width:min(68%,250px)}.welcome-auth{padding:16px}#v-find{padding-top:14px}#v-find .find-search{padding:12px}}
-\n.video-call-btn{flex:none;background:#159b62!important;color:#fff!important;border:0!important;border-radius:10px;padding:9px 12px!important;font-size:13px!important;font-weight:800;white-space:nowrap}.video-call-btn:disabled{opacity:.55}\n</style>
+
+.video-call-btn{flex:none;background:#159b62!important;color:#fff!important;border:0!important;border-radius:10px;padding:9px 12px!important;font-size:13px!important;font-weight:800;white-space:nowrap}.video-call-btn:disabled{opacity:.55}
+</style>
 </head>
 <body>
 <noscript><p style="padding:16px">Phomab needs JavaScript to run. Phomab helps you find a house to rent in Bulawayo.</p></noscript>
@@ -616,7 +618,8 @@ function closeChat(){if(rec)stopRec(false);curChat=null;curMembers=[];if(unsubMs
 function maybeAlert(){const to=(curMembers||[]).find(m=>m!==user.uid);if(!to||!curChat)return;const k="phb_al_"+curChat;let last=0;try{last=+localStorage.getItem(k)||0}catch(e){}
 if(Date.now()-last<20*60*1000)return;try{localStorage.setItem(k,String(Date.now()))}catch(e){}
 addDoc(collection(db,"alerts"),{chatId:curChat,to,from:user.uid,title:($("chat-h").textContent||"").slice(0,120),status:"pending",createdAt:serverTimestamp()}).catch(()=>{})}
-async function startVideoCall(){if(!curChat||!user){alert("Open a PHOMAB chat before starting a video call.");return}const btn=$("videoCallBtn");if(btn)btn.disabled=true;try{const bytes=new Uint8Array(18);if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(bytes);else for(let i=0;i<bytes.length;i++)bytes[i]=Math.floor(Math.random()*256);const token=Array.from(bytes,x=>x.toString(16).padStart(2,"0")).join("");const room="PHOMAB-"+token;const url="https://meet.jit.si/"+room;const win=window.open(url,"_blank","noopener,noreferrer");await post({text:"I started a PHOMAB video call. Join me here: "+url});if(!win)alert("The call link was sent in this chat, but your browser blocked the new tab. Open the link in the chat to join.");}catch(e){alert("Could not start the video call. Please try again.")}finally{if(btn)btn.disabled=false}}\nasync function post(data){if(!curChat||!user)return;try{await addDoc(collection(db,"chats",curChat,"messages"),{from:user.uid,at:serverTimestamp(),...data});maybeAlert();
+async function startVideoCall(){if(!curChat||!user){alert("Open a PHOMAB chat before starting a video call.");return}const btn=$("videoCallBtn");if(btn)btn.disabled=true;try{const bytes=new Uint8Array(18);if(window.crypto&&crypto.getRandomValues)crypto.getRandomValues(bytes);else for(let i=0;i<bytes.length;i++)bytes[i]=Math.floor(Math.random()*256);const token=Array.from(bytes,x=>x.toString(16).padStart(2,"0")).join("");const room="PHOMAB-"+token;const url="https://meet.jit.si/"+room;const win=window.open(url,"_blank","noopener,noreferrer");await post({text:"I started a PHOMAB video call. Join me here: "+url});if(!win)alert("The call link was sent in this chat, but your browser blocked the new tab. Open the link in the chat to join.");}catch(e){alert("Could not start the video call. Please try again.")}finally{if(btn)btn.disabled=false}}
+async function post(data){if(!curChat||!user)return;try{await addDoc(collection(db,"chats",curChat,"messages"),{from:user.uid,at:serverTimestamp(),...data});maybeAlert();
 updateDoc(doc(db,"chats",curChat),{updatedAt:serverTimestamp(),lastFrom:user.uid,lastText:data.text?data.text.slice(0,80):data.offer?"Offer: $"+data.offer:data.image?"Photo":data.audio?"Voice note":"New message"}).catch(()=>{})}catch(e){alert("Could not send: "+e.message)}}
 async function sendMsg(){const v=$("msg").value.trim();if(!v)return;$("msg").value="";post({text:v})}
 async function sendOffer(){const v=+$("offer").value;if(!v)return;$("offer").value="";$("offerRow").hidden=true;post({offer:v})}
@@ -665,27 +668,56 @@ function showDesk(){tab("desk");loadDesk();loadReports()}
 
 /* ---------- Phomab Help (built-in guide) ---------- */
 const KB=[
-{k:["hello","hi ","hey","sawubona","mhoro","hie","good morning","good afternoon"],a:"Hi! I\u2019m Phomab Help.\nAsk me how to use Phomab, or tell me the house you need, like 2 rooms in Nketha under $150."},
+{k:["hello","hi ","hey","sawubona","mhoro","hie","good morning","good afternoon"],a:"Hi! I\u2019m Phomab Help.
+Ask me how to use Phomab, or tell me the house you need, like 2 rooms in Nketha under $150."},
 {k:["thank","ngiyabonga","ndatenda","cheers"],a:"You\u2019re welcome!"},
-{k:["find a house","find house","search","look for","looking for","need a house","rent a house","get a house","funa indlu","tsvaga imba"],a:"Ask: type what you need, including rooms, area and budget, on the Find tab.\nMatch: open a suitable listing to see details and photos.\nAgree: use the landlord phone number, Chat on WhatsApp or Call Landlord options shown on the listing when available.",go:[["Go to Find",()=>tab("find")]]},
-{k:["list","post a house","landlord","vacancy","vacancies","advertise","rent out","add a house","add house","add my house","beka indlu","isa imba"],a:"To list a house:\n1. Sign in or create an account.\n2. Open the List tab.\n3. Fill in the title, area, rooms, rent and your WhatsApp number.\n4. Add photos (up to 10).\n5. Tap Save vacancy.",go:[["Open List",()=>tab("list")]]},
-{k:["photo","photos","picture","pictures","image","images","gallery"],a:"Photos:\n\u2022 On the List tab, tap + Photos and pick up to 10 pictures at once.\n\u2022 The first one is the cover.\n\u2022 Tap \u00d7 on a photo to remove it.\n\u2022 Tenants swipe through all photos when they open your house.",go:[["Open List",()=>tab("list")]]},
+{k:["find a house","find house","search","look for","looking for","need a house","rent a house","get a house","funa indlu","tsvaga imba"],a:"Ask: type what you need, including rooms, area and budget, on the Find tab.
+Match: open a suitable listing to see details and photos.
+Agree: use the landlord phone number, Chat on WhatsApp or Call Landlord options shown on the listing when available.",go:[["Go to Find",()=>tab("find")]]},
+{k:["list","post a house","landlord","vacancy","vacancies","advertise","rent out","add a house","add house","add my house","beka indlu","isa imba"],a:"To list a house:
+1. Sign in or create an account.
+2. Open the List tab.
+3. Fill in the title, area, rooms, rent and your WhatsApp number.
+4. Add photos (up to 10).
+5. Tap Save vacancy.",go:[["Open List",()=>tab("list")]]},
+{k:["photo","photos","picture","pictures","image","images","gallery"],a:"Photos:
+\u2022 On the List tab, tap + Photos and pick up to 10 pictures at once.
+\u2022 The first one is the cover.
+\u2022 Tap \u00d7 on a photo to remove it.
+\u2022 Tenants swipe through all photos when they open your house.",go:[["Open List",()=>tab("list")]]},
 {k:["chat","message","talk to","contact","reach","write to"],a:"To contact a landlord, open a property listing and look for the landlord contact section. Use Chat on WhatsApp or Call Landlord when the landlord has shared contact details. You can also use Phomab Chats where available.",go:[["Open Chats",()=>tab("chats")]]},
-{k:["offer","negotiate","agree","deal","accept","price"],a:"Offers:\n1. In a chat tap + then Make offer.\n2. Type the rent you suggest and send.\n3. The other person taps Accept to agree.",go:[["Open Chats",()=>tab("chats")]]},
+{k:["offer","negotiate","agree","deal","accept","price"],a:"Offers:
+1. In a chat tap + then Make offer.
+2. Type the rent you suggest and send.
+3. The other person taps Accept to agree.",go:[["Open Chats",()=>tab("chats")]]},
 {k:["voice","record","audio"],a:"Voice notes: in a chat tap +, then Voice note. Speak, then tap it again to send. Notes stop after 45 seconds."},
-{k:["taken","rented","no longer","remove","delete","unlist","hide"],a:"When a house is taken:\n1. Open the List tab.\n2. Tap Mark as taken on that house.\nIt stops showing in searches. You can bring it back with Make available again.",go:[["Open List",()=>tab("list")]]},
+{k:["taken","rented","no longer","remove","delete","unlist","hide"],a:"When a house is taken:
+1. Open the List tab.
+2. Tap Mark as taken on that house.
+It stops showing in searches. You can bring it back with Make available again.",go:[["Open List",()=>tab("list")]]},
 {k:["sign in","login","log in","register","sign up","account","password","create account","email"],a:"Tap the Account tab, enter your email and a password (6+ characters), then tap Create account or Sign in. You only need an account to chat, list or post a request.",go:[["Open Account",()=>tab("account")]]},
 {k:["free","cost","pay","charge","fee","money","price of phomab"],a:"Phomab is free to use. Never pay a deposit or rent before you have viewed the house in person."},
-{k:["safe","scam","trust","fraud","verify","cheat","steal"],a:"Stay safe:\n\u2022 View the house in person first.\n\u2022 Never pay before you see it.\n\u2022 Keep chats on Phomab until you are sure.\n\u2022 Meet in daylight, and bring someone with you."},
+{k:["safe","scam","trust","fraud","verify","cheat","steal"],a:"Stay safe:
+\u2022 View the house in person first.
+\u2022 Never pay before you see it.
+\u2022 Keep chats on Phomab until you are sure.
+\u2022 Meet in daylight, and bring someone with you."},
 {k:["report","scam listing","fake listing","wrong information","not available anymore"],a:"To report a listing: open it, tap Report listing, choose a reason and send. Phomab reviews every report and can hide a listing."},
 {k:["filter","sort","cheapest","furnished","price range","bedroom","minimum","maximum"],a:"Use Filters under the search box: type, rooms, price range, furnished and sorting. Tap Clear filters to start again."},
-{k:["chat on whatsapp","contact on whatsapp","landlord number","phone number","call the landlord","landlord whatsapp"],a:"Contacting a landlord:\n\u2022 Open a house. You will see the landlord\u2019s number with Chat on WhatsApp and Call landlord buttons. Sign in to see the number.\n\u2022 Landlords must add their WhatsApp number when they list a house.\n\u2022 Tenants add theirs when they post a request, so landlords can reach them."},
-{k:["alert","notification","notify","whatsapp","not on the site","offline","buzz"],a:"Alerts:\n\u2022 Chats shows a number when you have new messages.\n\u2022 In Account, turn on message alerts.\n\u2022 Save your WhatsApp number there too. Phomab can alert you on WhatsApp. Your number stays private.",go:[["Open Account",()=>tab("account")]]},
+{k:["chat on whatsapp","contact on whatsapp","landlord number","phone number","call the landlord","landlord whatsapp"],a:"Contacting a landlord:
+\u2022 Open a house. You will see the landlord\u2019s number with Chat on WhatsApp and Call landlord buttons. Sign in to see the number.
+\u2022 Landlords must add their WhatsApp number when they list a house.
+\u2022 Tenants add theirs when they post a request, so landlords can reach them."},
+{k:["alert","notification","notify","whatsapp","not on the site","offline","buzz"],a:"Alerts:
+\u2022 Chats shows a number when you have new messages.
+\u2022 In Account, turn on message alerts.
+\u2022 Save your WhatsApp number there too. Phomab can alert you on WhatsApp. Your number stays private.",go:[["Open Account",()=>tab("account")]]},
 {k:["tenant request","post my request","find a tenant","tenants","looking for a tenant","wanted"],a:"Tenants can post a request after a search, so landlords can contact them. Landlords see the requests on the Find tab and tap Contact tenant."},
 {k:["language","shona","ndebele","english","ulimi","mutauro"],a:"Change the language in Account. Some labels are available in Ndebele and Shona.",go:[["Open Account",()=>tab("account")]]},
 {k:["data","slow","install","home screen","app","load"],a:"Phomab uses little data: photos are compressed and the page is cached. To keep it handy, open your browser menu and choose Add to Home screen."}
 ];
-function helpSay(txt,cls,acts){const box=$("hmsgs"),el=mk("div","m "+cls);String(txt).split("\n").forEach(l=>el.appendChild(mk("div","",l)));
+function helpSay(txt,cls,acts){const box=$("hmsgs"),el=mk("div","m "+cls);String(txt).split("
+").forEach(l=>el.appendChild(mk("div","",l)));
 if(acts&&acts.length){const row=mk("div","acts");acts.forEach(a=>{const b=mk("button","",a[0]);b.type="button";b.onclick=()=>{closeHelp();a[1]()};row.appendChild(b)});el.appendChild(row)}
 box.appendChild(el);box.scrollTop=box.scrollHeight}
 function ask(q){
@@ -702,8 +734,12 @@ function ask(q){
    if(o.min)found=found.filter(l=>Number(l.rent)>=o.min);
    if(o.feats.length)found=found.filter(l=>o.feats.every(f=>{const txt=(String(l.title||"")+" "+String(l.desc||"")).toLowerCase();return FEAT[f].some(w=>txt.includes(w))}));
    if(found.length){
-     const sample=found.slice(0,4).map(l=>"• "+(l.title||"Rental")+" — "+(l.area||"Area not stated")+", "+(l.rooms||"?")+" room(s), "+(l.rent?"$"+l.rent:"rent not stated")).join("\\n");
-     helpSay("I checked the listings currently loaded on PHOMAB. I found "+found.length+" matching listing(s):\\n"+sample+(found.length>4?"\\nOpen Find to see more.":"")+"\\nConfirm availability and details with the landlord before paying.", "l", [["Open matching listings",()=>{closeHelp();tab("find");$("q").value=q;run()}]]);return;
+     const sample=found.slice(0,4).map(l=>"• "+(l.title||"Rental")+" — "+(l.area||"Area not stated")+", "+(l.rooms||"?")+" room(s), "+(l.rent?"$"+l.rent:"rent not stated")).join("\
+");
+     helpSay("I checked the listings currently loaded on PHOMAB. I found "+found.length+" matching listing(s):\
+"+sample+(found.length>4?"\
+Open Find to see more.":"")+"\
+Confirm availability and details with the landlord before paying.", "l", [["Open matching listings",()=>{closeHelp();tab("find");$("q").value=q;run()}]]);return;
    }
    helpSay("I couldn't find a matching listing in the data currently loaded. That doesn't prove no house exists—try widening the area or budget, or open Find to check the latest results.", "l", [["Search PHOMAB",()=>{closeHelp();tab("find");$("q").value=q;run()}]]);return;
  }
@@ -721,7 +757,8 @@ function ask(q){
  if(best&&bs>0){helpSay(best.a,"l",best.go);return}
  helpSay("I haven't found a confident answer to that yet. I can help you search rentals, understand matching, list a vacancy, contact landlords, stay safe, or manage your account. For current availability, check Find and confirm with the landlord.", "l", [["Find a house",()=>{closeHelp();tab("find")}],["List a vacancy",()=>{closeHelp();tab("list")}],["Account help",()=>{closeHelp();tab("account")}]])
 }
-function openHelp(){$("help").hidden=false;document.body.style.overflow="hidden";if(!$("hmsgs").children.length)helpSay("Hi! I\u2019m Phomab Help.\nAsk me how to use Phomab, or tell me the house you need.","l")}
+function openHelp(){$("help").hidden=false;document.body.style.overflow="hidden";if(!$("hmsgs").children.length)helpSay("Hi! I\u2019m Phomab Help.
+Ask me how to use Phomab, or tell me the house you need.","l")}
 function closeHelp(){$("help").hidden=true;document.body.style.overflow=""}
 
 /* ---------- start ---------- */
@@ -743,7 +780,8 @@ async function getPhone(){if(!sheetL)return null;if(!user){closeSheet();showAuth
 if(curPhone)return curPhone;try{const sn=await getDoc(doc(db,"listings",sheetL.id,"contact","wa"));curPhone=sn.exists()?sn.data().phone:null}catch(e){alert("Could not load the number: "+e.message);return null}
 if(!curPhone)alert("This landlord has not shared a number.");return curPhone}
 $("shWa").onclick=async()=>{const p=await getPhone();if(!p)return;const d=validNum(p);if(!d){alert("This number looks invalid. Try calling or chat in Phomab.");return}
-window.open("https://wa.me/"+d+"?text="+encodeURIComponent("Hello, I found your property on PHOMAB. Is it still available?\n"+sheetL.title+" ("+sheetL.area+", $"+sheetL.rent+"/month)"),"_blank")};
+window.open("https://wa.me/"+d+"?text="+encodeURIComponent("Hello, I found your property on PHOMAB. Is it still available?
+"+sheetL.title+" ("+sheetL.area+", $"+sheetL.rent+"/month)"),"_blank")};
 $("shCall").onclick=async()=>{const p=await getPhone();if(!p)return;const d=validNum(p);if(!d){alert("This number looks invalid. Try chat in Phomab.");return}location.href="tel:+"+d};
 $("shReport").onclick=()=>{if(!user){closeSheet();showAuth("Sign in to report a listing.");return}$("reportBox").hidden=!$("reportBox").hidden};
 $("rp-cancel").onclick=()=>{$("reportBox").hidden=true};
