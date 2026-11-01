@@ -775,8 +775,7 @@ Confirm availability and details with the landlord before paying.", "l", [["Open
  if(best&&bs>0){helpSay(best.a,"l",best.go);return}
  helpSay("I haven't found a confident answer to that yet. I can help you search rentals, understand matching, list a vacancy, contact landlords, stay safe, or manage your account. For current availability, check Find and confirm with the landlord.", "l", [["Find a house",()=>{closeHelp();tab("find")}],["List a vacancy",()=>{closeHelp();tab("list")}],["Account help",()=>{closeHelp();tab("account")}]])
 }
-function openHelp(){$("help").hidden=false;document.body.style.overflow="hidden";if(!$("hmsgs").children.length)helpSay("Hi! I\u2019m Phomab Help.
-Ask me how to use Phomab, or tell me the house you need.","l")}
+function openHelp(){$("help").hidden=false;document.body.style.overflow="hidden";if(!$("hmsgs").children.length)helpSay("Hi! I\u2019m Phomab Help.\nAsk me how to use Phomab, or tell me the house you need.","l")}
 function closeHelp(){$("help").hidden=true;document.body.style.overflow=""}
 
 /* ---------- start ---------- */
@@ -798,8 +797,7 @@ async function getPhone(){if(!sheetL)return null;if(!user){closeSheet();showAuth
 if(curPhone)return curPhone;try{const sn=await getDoc(doc(db,"listings",sheetL.id,"contact","wa"));curPhone=sn.exists()?sn.data().phone:null}catch(e){alert("Could not load the number: "+e.message);return null}
 if(!curPhone)alert("This landlord has not shared a number.");return curPhone}
 $("shWa").onclick=async()=>{const p=await getPhone();if(!p)return;const d=validNum(p);if(!d){alert("This number looks invalid. Try calling or chat in Phomab.");return}
-window.open("https://wa.me/"+d+"?text="+encodeURIComponent("Hello, I found your property on PHOMAB. Is it still available?
-"+sheetL.title+" ("+sheetL.area+", $"+sheetL.rent+"/month)"),"_blank")};
+window.open("https://wa.me/"+d+"?text="+encodeURIComponent("Hello, I found your property on PHOMAB. Is it still available?\n"+sheetL.title+" ("+sheetL.area+", $"+sheetL.rent+"/month)"),"_blank")};
 $("shCall").onclick=async()=>{const p=await getPhone();if(!p)return;const d=validNum(p);if(!d){alert("This number looks invalid. Try chat in Phomab.");return}location.href="tel:+"+d};
 $("shReport").onclick=()=>{if(!user){closeSheet();showAuth("Sign in to report a listing.");return}$("reportBox").hidden=!$("reportBox").hidden};
 $("rp-cancel").onclick=()=>{$("reportBox").hidden=true};
